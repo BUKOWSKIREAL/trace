@@ -72,6 +72,32 @@ class CommitsViewBehavior(unittest.IsolatedAsyncioTestCase):
             await pilot.pause()
             self.assertEqual(len(view.commit_list.children), 0)
 
+    async def test_restore_key_opens_modal_listing_restorable_files_and_restores_on_confirm(self):
+        a = self.ws / "a.txt"
+        a.write_text("one\n", encoding="utf-8")
+        self.repo.commit("human", [make_change(a)])
+        a.write_text("two\n", encoding="utf-8")
+        self.repo.commit("human", [make_change(a)])
+
+        app = _Harness(self.controller)
+        async with app.run_test() as pilot:
+            view = app.query_one(CommitsView)
+            await view.refresh_commits()
+            await pilot.pause()
+            await view.select_commit(view._commit_ids[-1])  # oldest = first commit
+            await pilot.pause()
+
+            await view.action_restore_selected_file()
+            await pilot.pause()
+            from tui.views.commits import RestoreConfirmModal
+            modal = app.screen
+            self.assertIsInstance(modal, RestoreConfirmModal)
+
+            await modal.confirm()
+            await pilot.pause()
+
+            self.assertEqual(a.read_text(encoding="utf-8"), "one\n")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,16 +2,46 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, VerticalScroll
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.screen import ModalScreen
 from textual.widget import Widget
-from textual.widgets import Label, ListItem, ListView, RichLog
+from textual.widgets import Button, Label, ListItem, ListView, RichLog
 
 _STATUS_MARK = {"new": "[+ new]", "modified": "[~ mod]", "deleted": "[- del]"}
 _TAG_STYLE = {"added": "green", "removed": "red", "meta": "dim"}
 
 
+class RestoreConfirmModal(ModalScreen[bool]):
+    """Confirms restoring one file from one commit before touching the workspace."""
+
+    def __init__(self, commit_id: int, file_path: str, controller) -> None:
+        super().__init__()
+        self._commit_id = commit_id
+        self._file_path = file_path
+        self._controller = controller
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="restore-modal"):
+            yield Label(f"Restore {self._file_path} to commit #{self._commit_id}?")
+            with Horizontal():
+                yield Button("Restore", id="confirm", variant="error")
+                yield Button("Cancel", id="cancel")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "confirm":
+            self.run_worker(self.confirm())
+        else:
+            self.dismiss(False)
+
+    async def confirm(self) -> None:
+        result = self._controller.restore_file(self._commit_id, self._file_path)
+        self.dismiss(bool(result.get("ok")))
+
+
 class CommitsView(Widget):
     """Shows the commit timeline and the diff for whichever commit is selected."""
+
+    BINDINGS = [("r", "restore_selected_file", "Restore file")]
 
     def __init__(self, controller) -> None:
         super().__init__()
@@ -70,3 +100,14 @@ class CommitsView(Widget):
                 style = _TAG_STYLE.get(line.get("tag"), "")
                 text = line.get("text", "")
                 log.write(f"[{style}]{text}[/{style}]" if style else text)
+
+    async def action_restore_selected_file(self) -> None:
+        if self._selected_commit_id is None:
+            return
+        restorable = [f for f in self._selected_files if f["can_restore"]]
+        if not restorable:
+            return
+        # v1: act on the first restorable file in the current diff view.
+        target = restorable[0]
+        modal = RestoreConfirmModal(self._selected_commit_id, target["path"], self._controller)
+        await self.app.push_screen(modal)
