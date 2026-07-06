@@ -10,6 +10,8 @@ from typing import Any
 
 from core.electron_diff_bridge import render_file_diff
 
+_MAX_DIFF_LINES = 800
+
 
 class TraceController:
     def __init__(self, repo, workspace: Path) -> None:
@@ -40,6 +42,66 @@ class TraceController:
         try:
             self._repo.reassign_commit(commit_id, new_agent)
             return {"ok": True}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def get_manifest(self, commit_id: int) -> dict[str, Any]:
+        try:
+            return {"ok": True, "manifest": self._repo.get_manifest(commit_id)}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def get_prev_commit_id(self, commit_id: int) -> dict[str, Any]:
+        try:
+            return {"ok": True, "prev_id": self._repo.get_prev_commit_id(commit_id)}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def get_commit_diff(self, commit_id: int) -> dict[str, Any]:
+        """Assemble the full diff view for a commit: changed files + rendered lines.
+
+        Ports the algorithm from the Electron console's onSelectCommit: union the
+        current and previous commit's manifests, classify each changed path as
+        new/modified/deleted, render its diff, and truncate long diffs.
+        """
+        try:
+            prev_id = self._repo.get_prev_commit_id(commit_id)
+            cur_manifest = self._repo.get_manifest(commit_id)
+            prev_manifest = self._repo.get_manifest(prev_id) if prev_id is not None else []
+
+            cur_map = {row["file_path"]: row["blob_hash"] for row in cur_manifest}
+            prev_map = {row["file_path"]: row["blob_hash"] for row in prev_manifest}
+
+            files: list[dict[str, Any]] = []
+            for file_path in sorted(set(cur_map) | set(prev_map)):
+                cur_hash = cur_map.get(file_path)
+                prev_hash = prev_map.get(file_path)
+                if cur_hash == prev_hash:
+                    continue
+                if prev_hash is None:
+                    status = "new"
+                elif cur_hash is None:
+                    status = "deleted"
+                else:
+                    status = "modified"
+
+                lines = render_file_diff(self._workspace, file_path, prev_hash, cur_hash)
+                if len(lines) > _MAX_DIFF_LINES:
+                    omitted = len(lines) - _MAX_DIFF_LINES
+                    lines = lines[:_MAX_DIFF_LINES] + [
+                        {"tag": "meta", "text": f"... (truncated {omitted} lines)"}
+                    ]
+
+                files.append({
+                    "path": file_path,
+                    "status": status,
+                    "prev_hash": prev_hash,
+                    "cur_hash": cur_hash,
+                    "can_restore": cur_hash is not None,
+                    "lines": lines,
+                })
+
+            return {"ok": True, "files": files}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": str(exc)}
 
