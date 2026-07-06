@@ -136,6 +136,19 @@ def _run_headless(daemon, log: logging.Logger) -> int:
     return 0
 
 
+def _run_with_tui(daemon, log: logging.Logger) -> int:
+    """Default mode: TraceApp (Textual TUI) owns the main thread."""
+    from tui.app import TraceApp
+
+    app = TraceApp(daemon=daemon)
+    try:
+        app.run()
+    finally:
+        daemon.stop()
+        log.info("Trace已退出。")
+    return 0
+
+
 def _run_with_menubar(daemon, log: logging.Logger) -> int:
     """带菜单栏模式：TraceApp 接管主线程跑系统托盘。"""
     from menubar.app import TraceApp
@@ -185,7 +198,7 @@ def main() -> int:
 
     if args.headless:
         return _run_headless(daemon, log)
-    return _run_with_menubar(daemon, log)
+    return _run_with_tui(daemon, log)
 
 
 if __name__ == "__main__":
