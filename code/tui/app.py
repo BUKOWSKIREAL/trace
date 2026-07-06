@@ -6,7 +6,9 @@ from textual.widgets import Footer, Header, Static, TabbedContent, TabPane
 
 from daemon import ipc
 from tui.controller import TraceController
+from tui.views.agents import AgentsView
 from tui.views.commits import CommitsView
+from tui.views.workspace import WorkspaceView
 
 
 class TraceApp(App):
@@ -26,9 +28,9 @@ class TraceApp(App):
             with TabPane("Commits", id="tab-commits"):
                 yield CommitsView(self._controller)
             with TabPane("Agents", id="tab-agents"):
-                yield Static("agents", id="body-agents")
+                yield AgentsView(self._controller)
             with TabPane("Workspace", id="tab-workspace"):
-                yield Static("workspace", id="body-workspace")
+                yield WorkspaceView(self._controller)
             with TabPane("MCP", id="tab-mcp"):
                 yield Static("mcp", id="body-mcp")
         yield Static("", id="status-line")
@@ -46,6 +48,8 @@ class TraceApp(App):
                     f"new commit #{cid} by {agent}"
                 )
                 self.run_worker(self.query_one(CommitsView).refresh_commits())
+                self.run_worker(self.query_one(AgentsView).refresh_agents())
+                self.run_worker(self.query_one(WorkspaceView).refresh_summary())
             elif event.type == "error":
                 self.query_one("#status-line", Static).update(
                     f"[red]{event.payload.get('message', 'error')}[/red]"

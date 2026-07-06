@@ -81,6 +81,31 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
 
                 self.assertEqual(len(view.commit_list.children), 1)
 
+    async def test_agents_and_workspace_tabs_are_populated(self):
+        import tempfile
+        from pathlib import Path as _Path
+        from core.repository import Repository
+        from tui.views.agents import AgentsView
+        from tui.views.workspace import WorkspaceView
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = _Path(tmp)
+            repo = Repository(ws)
+            repo.init_if_needed()
+            controller = TraceController(repo, ws)
+
+            daemon = _FakeDaemon()
+            daemon.repo = repo
+            daemon.workspace = ws
+
+            app = TraceApp(daemon=daemon, controller=controller)
+            async with app.run_test() as pilot:
+                await pilot.pause()
+                self.assertIsInstance(app.query_one(AgentsView), AgentsView)
+                self.assertIsInstance(app.query_one(WorkspaceView), WorkspaceView)
+                # agents view is populated from the preset agents
+                self.assertGreaterEqual(len(app.query_one(AgentsView).agent_list.children), 5)
+
 
 if __name__ == "__main__":
     unittest.main()
