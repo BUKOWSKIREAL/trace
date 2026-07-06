@@ -30,7 +30,6 @@ class TraceApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        self._daemon.start(self._daemon.workspace)
         self.set_interval(0.5, self._drain_ipc)
 
     def _drain_ipc(self) -> None:
@@ -45,6 +44,3 @@ class TraceApp(App):
                 self.query_one("#status-line", Static).update(
                     f"[red]{event.payload.get('message', 'error')}[/red]"
                 )
-
-    def on_unmount(self) -> None:
-        self._daemon.stop()
