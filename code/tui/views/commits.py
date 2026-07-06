@@ -38,10 +38,39 @@ class RestoreConfirmModal(ModalScreen[bool]):
         self.dismiss(bool(result.get("ok")))
 
 
+class ReassignModal(ModalScreen[str | None]):
+    """Lets the user pick the correct agent for an ambiguous commit."""
+
+    def __init__(self, commit_id: int, candidates: list[str], controller) -> None:
+        super().__init__()
+        self._commit_id = commit_id
+        self._candidates = candidates if "human" in candidates else candidates + ["human"]
+        self._controller = controller
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="reassign-modal"):
+            yield Label(f"Who made commit #{self._commit_id}?")
+            yield ListView(
+                *[ListItem(Label(name), id=f"agent-{name}") for name in self._candidates],
+                id="agent-choices",
+            )
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        name = event.item.id.removeprefix("agent-")
+        self.run_worker(self.choose(name))
+
+    async def choose(self, agent: str) -> None:
+        result = self._controller.reassign_commit(self._commit_id, agent)
+        self.dismiss(agent if result.get("ok") else None)
+
+
 class CommitsView(Widget):
     """Shows the commit timeline and the diff for whichever commit is selected."""
 
-    BINDINGS = [("r", "restore_selected_file", "Restore file")]
+    BINDINGS = [
+        ("r", "restore_selected_file", "Restore file"),
+        ("a", "reassign_selected_commit", "Reassign agent"),
+    ]
 
     def __init__(self, controller) -> None:
         super().__init__()
@@ -110,4 +139,14 @@ class CommitsView(Widget):
         # v1: act on the first restorable file in the current diff view.
         target = restorable[0]
         modal = RestoreConfirmModal(self._selected_commit_id, target["path"], self._controller)
+        await self.app.push_screen(modal)
+
+    async def action_reassign_selected_commit(self) -> None:
+        if self._selected_commit_id is None:
+            return
+        commit = self._commits_by_id.get(self._selected_commit_id)
+        if commit is None:
+            return
+        candidates = commit.get("candidates") or []
+        modal = ReassignModal(self._selected_commit_id, list(candidates), self._controller)
         await self.app.push_screen(modal)
