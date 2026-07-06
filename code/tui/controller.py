@@ -116,3 +116,15 @@ class TraceController:
             return {"ok": True, "commit_id": self._repo.revert_agent(agent)}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": str(exc)}
+
+    def list_agents(self) -> dict[str, Any]:
+        try:
+            return {"ok": True, "agents": self._repo.list_agents()}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def get_workspace_summary(self) -> dict[str, Any]:
+        try:
+            return {"ok": True, "summary": self._repo.workspace_summary()}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}

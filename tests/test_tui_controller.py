@@ -39,6 +39,12 @@ class _BoomRepo:
     def revert_agent(self, agent, backup_current=True):
         raise RuntimeError("boom")
 
+    def list_agents(self):
+        raise RuntimeError("boom")
+
+    def workspace_summary(self):
+        raise RuntimeError("boom")
+
 
 class TraceControllerHappyPath(unittest.TestCase):
     def setUp(self):
@@ -152,6 +158,34 @@ class TraceControllerCommitDiff(unittest.TestCase):
         result = self.controller.get_commit_diff(999)
         self.assertTrue(result["ok"])
         self.assertEqual(result["files"], [])
+
+
+class TraceControllerAgentsWorkspace(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.ws = Path(self._tmp.name).resolve()
+        self.repo = Repository(self.ws)
+        self.repo.init_if_needed()
+        self.controller = TraceController(self.repo, self.ws)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_list_agents_ok(self):
+        result = self.controller.list_agents()
+        self.assertTrue(result["ok"])
+        self.assertTrue(any(a["name"] == "claude" for a in result["agents"]))
+
+    def test_get_workspace_summary_ok(self):
+        result = self.controller.get_workspace_summary()
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["summary"]["workspace"], str(self.ws))
+
+    def test_list_agents_wraps_error(self):
+        controller = TraceController(_BoomRepo(), Path("/tmp"))
+        result = controller.list_agents()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "boom")
 
 
 if __name__ == "__main__":
