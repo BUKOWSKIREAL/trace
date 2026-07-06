@@ -306,6 +306,24 @@ class Repository:
             commits.append(item)
         return commits
 
+    def get_manifest(self, commit_id: int) -> list[dict]:
+        """返回某次 commit 的完整文件清单 [{file_path, blob_hash}, ...]。"""
+        conn = get_connection(self.db_path)
+        rows = conn.execute(
+            "SELECT file_path, blob_hash FROM snapshots WHERE commit_id = ?",
+            (commit_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_prev_commit_id(self, commit_id: int) -> int | None:
+        """返回给定 commit 之前最近的一次 commit id；不存在则 None。"""
+        conn = get_connection(self.db_path)
+        row = conn.execute(
+            "SELECT id FROM commits WHERE id < ? ORDER BY id DESC LIMIT 1",
+            (commit_id,),
+        ).fetchone()
+        return row["id"] if row is not None else None
+
     def get_config(self) -> dict:
         """Return merged workspace config."""
         from utils.config import load_config
