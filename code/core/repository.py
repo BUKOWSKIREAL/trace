@@ -324,6 +324,38 @@ class Repository:
         ).fetchone()
         return row["id"] if row is not None else None
 
+    def list_agents(self) -> list[dict]:
+        """每个 agent 的注册信息 + commit 统计（按 commit 数降序）。"""
+        conn = get_connection(self.db_path)
+        rows = conn.execute(
+            """
+            SELECT a.name, a.category, a.display_name, a.color,
+                   COALESCE(stats.commit_count, 0) AS commit_count,
+                   stats.last_time
+            FROM agents a
+            LEFT JOIN (
+                SELECT author_agent, COUNT(*) AS commit_count, MAX(time) AS last_time
+                FROM commits GROUP BY author_agent
+            ) stats ON stats.author_agent = a.name
+            ORDER BY commit_count DESC, a.name ASC
+            """
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def workspace_summary(self) -> dict:
+        """当前工作区概览：路径、db、commit/snapshot/agent 计数。"""
+        conn = get_connection(self.db_path)
+        commit_count = conn.execute("SELECT COUNT(*) AS n FROM commits").fetchone()["n"]
+        snapshot_count = conn.execute("SELECT COUNT(*) AS n FROM snapshots").fetchone()["n"]
+        agent_count = conn.execute("SELECT COUNT(*) AS n FROM agents").fetchone()["n"]
+        return {
+            "workspace": str(self.workspace),
+            "db_path": str(self.db_path),
+            "commit_count": commit_count,
+            "snapshot_count": snapshot_count,
+            "agent_count": agent_count,
+        }
+
     def get_config(self) -> dict:
         """Return merged workspace config."""
         from utils.config import load_config
