@@ -16,7 +16,9 @@ class TraceApp(App):
     def __init__(self, daemon, controller: TraceController | None = None) -> None:
         super().__init__()
         self._daemon = daemon
-        self._controller = controller or TraceController(daemon.repo, daemon.workspace)
+        self._controller = controller or TraceController(
+            getattr(daemon, "repo", None), daemon.workspace
+        )
 
     def compose(self) -> ComposeResult:
         yield Header()
