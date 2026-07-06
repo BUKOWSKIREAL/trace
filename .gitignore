@@ -1,0 +1,39 @@
+.Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE / agent tooling
+.vscode/
+.idea/
+.cursor/
+.claude/
+*.swp
+*.swo
+
+# Node.js
+node_modules/
+electron_app/dist/
+electron_app/out/
+electron_app/renderer-dist/
+
+# Trace runtime / local workspaces
+.trace/
+test_workspace/
+tmp/
