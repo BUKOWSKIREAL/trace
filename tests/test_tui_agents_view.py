@@ -53,6 +53,32 @@ class AgentsViewBehavior(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(view.active_count, 1)
             self.assertGreaterEqual(len(view.agent_list.children), 5)
 
+    async def test_revert_key_previews_file_count_then_reverts_on_confirm(self):
+        a = self.ws / "a.txt"
+        a.write_text("human-1\n", encoding="utf-8")
+        self.repo.commit("human", [make_change(a)])
+        a.write_text("claude changed this\n", encoding="utf-8")
+        self.repo.commit("claude", [make_change(a, agent="claude")])
+
+        app = _Harness(self.controller)
+        async with app.run_test() as pilot:
+            view = app.query_one(AgentsView)
+            await view.refresh_agents()
+            await pilot.pause()
+
+            await view.action_revert_agent("claude")
+            await pilot.pause()
+            from tui.views.agents import RevertConfirmModal
+            modal = app.screen
+            self.assertIsInstance(modal, RevertConfirmModal)
+            self.assertEqual(modal.changed_count, 1)  # only a.txt affected
+
+            await modal.confirm()
+            await pilot.pause()
+
+            # claude's change is reverted: a.txt goes back to the human version
+            self.assertEqual((self.ws / "a.txt").read_text(encoding="utf-8"), "human-1\n")
+
 
 if __name__ == "__main__":
     unittest.main()
