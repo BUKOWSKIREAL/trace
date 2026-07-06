@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -6,8 +7,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "code"))
 
 from textual.widgets import Static
 
+from core.repository import Repository
 from daemon import ipc
+from models.agent import AgentAttribution
+from models.change import Change
 from tui.app import TraceApp
+from tui.controller import TraceController
+from tui.views.commits import CommitsView
 
 
 class _FakeDaemon:
@@ -41,6 +47,39 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
             await pilot.pause(0.6)  # let the drain interval fire
             status = app.query_one("#status-line", Static)
             self.assertIn("7", str(status.render()))
+
+    async def test_commits_tab_hosts_commits_view_and_refreshes_on_new_commit(self):
+        from daemon import ipc as _ipc
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = Path(tmp)
+            repo = Repository(ws)
+            repo.init_if_needed()
+            controller = TraceController(repo, ws)
+
+            daemon = _FakeDaemon()
+            daemon.repo = repo
+            daemon.workspace = ws
+
+            app = TraceApp(daemon=daemon, controller=controller)
+            async with app.run_test() as pilot:
+                await pilot.pause()
+                view = app.query_one(CommitsView)
+                self.assertEqual(len(view.commit_list.children), 0)
+
+                a = ws / "a.txt"
+                a.write_text("hi", encoding="utf-8")
+                change = Change(
+                    file_path=a,
+                    event_time=0.0,
+                    attribution=AgentAttribution(agent="human", confidence=0.95),
+                    kind="upsert",
+                )
+                repo.commit("human", [change])
+                _ipc.emit("new_commit", commit_id=1, agent="human")
+                await pilot.pause(0.6)
+
+                self.assertEqual(len(view.commit_list.children), 1)
 
 
 if __name__ == "__main__":
