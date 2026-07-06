@@ -42,6 +42,7 @@ class RevertConfirmModal(ModalScreen[bool]):
 
 class AgentsView(Widget):
     BINDINGS = [("r", "revert_highlighted_agent", "Revert agent")]
+    _NON_REVERTABLE = {"human", "unknown"}
 
     def __init__(self, controller) -> None:
         super().__init__()
@@ -94,6 +95,9 @@ class AgentsView(Widget):
         await self.action_revert_agent(agent)
 
     async def action_revert_agent(self, agent: str) -> None:
+        if agent in self._NON_REVERTABLE:
+            self.app.notify(f"'{agent}' contributions can't be reverted", severity="warning")
+            return
         preview = self._controller.preview_revert_agent(agent)
         if not preview.get("ok"):
             return

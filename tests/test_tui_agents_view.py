@@ -79,6 +79,21 @@ class AgentsViewBehavior(unittest.IsolatedAsyncioTestCase):
             # claude's change is reverted: a.txt goes back to the human version
             self.assertEqual((self.ws / "a.txt").read_text(encoding="utf-8"), "human-1\n")
 
+    async def test_reverting_human_or_unknown_is_refused(self):
+        a = self.ws / "a.txt"
+        a.write_text("x\n", encoding="utf-8")
+        self.repo.commit("human", [make_change(a)])
+
+        app = _Harness(self.controller)
+        async with app.run_test() as pilot:
+            view = app.query_one(AgentsView)
+            await view.refresh_agents()
+            await pilot.pause()
+            await view.action_revert_agent("human")
+            await pilot.pause()
+            from tui.views.agents import RevertConfirmModal
+            self.assertNotIsInstance(app.screen, RevertConfirmModal)
+
 
 if __name__ == "__main__":
     unittest.main()
