@@ -98,6 +98,24 @@ class CommitsViewBehavior(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(a.read_text(encoding="utf-8"), "one\n")
 
+    async def test_diff_with_bracket_content_renders_literally_without_crashing(self):
+        a = self.ws / "a.py"
+        a.write_text("x = 1\n", encoding="utf-8")
+        self.repo.commit("human", [make_change(a)])
+        a.write_text("y = xs[i] + m[0]  # [/] not a real tag\n", encoding="utf-8")
+        self.repo.commit("human", [make_change(a)])
+
+        app = _Harness(self.controller)
+        async with app.run_test() as pilot:
+            view = app.query_one(CommitsView)
+            await view.refresh_commits()
+            await pilot.pause()
+            await view.select_commit(view._commit_ids[0])  # newest commit
+            await pilot.pause()
+            rendered = str(app.query_one(RichLog).lines)
+            self.assertIn("xs[i]", rendered)   # literal brackets preserved, not swallowed
+            self.assertIn("m[0]", rendered)
+
     async def test_reassign_key_opens_modal_for_uncertain_commit_and_applies_choice(self):
         a = self.ws / "a.txt"
         a.write_text("one\n", encoding="utf-8")

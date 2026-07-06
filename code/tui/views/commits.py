@@ -1,6 +1,7 @@
 """CommitsView — timeline list (left) + diff pane (right)."""
 from __future__ import annotations
 
+from rich.text import Text
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
@@ -22,7 +23,7 @@ class RestoreConfirmModal(ModalScreen[bool]):
 
     def compose(self) -> ComposeResult:
         with Vertical(id="restore-modal"):
-            yield Label(f"Restore {self._file_path} to commit #{self._commit_id}?")
+            yield Label(Text(f"Restore {self._file_path} to commit #{self._commit_id}?"))
             with Horizontal():
                 yield Button("Restore", id="confirm", variant="error")
                 yield Button("Cancel", id="cancel")
@@ -105,7 +106,7 @@ class CommitsView(Widget):
             summary = commit.get("summary") or ""
             agent = commit.get("author_agent") or "unknown"
             label = f"#{commit['id']} [{agent}] {summary}"
-            await list_view.append(ListItem(Label(label), id=f"commit-{commit['id']}"))
+            await list_view.append(ListItem(Label(Text(label)), id=f"commit-{commit['id']}"))
 
     async def on_list_view_selected(self, event: ListView.Selected) -> None:
         if event.list_view.id != "commit-list":
@@ -120,15 +121,14 @@ class CommitsView(Widget):
         self._selected_commit_id = commit_id
         self._selected_files = result.get("files", []) if result.get("ok") else []
         if not result.get("ok"):
-            log.write(f"[red]diff failed: {result.get('error')}[/red]")
+            log.write(Text(f"diff failed: {result.get('error')}", style="red"))
             return
         for file in result["files"]:
             mark = _STATUS_MARK.get(file["status"], file["status"])
-            log.write(f"[bold]{mark} {file['path']}[/bold]")
+            log.write(Text(f"{mark} {file['path']}", style="bold"))
             for line in file["lines"]:
                 style = _TAG_STYLE.get(line.get("tag"), "")
-                text = line.get("text", "")
-                log.write(f"[{style}]{text}[/{style}]" if style else text)
+                log.write(Text(line.get("text", ""), style=style))
 
     async def action_restore_selected_file(self) -> None:
         if self._selected_commit_id is None:
