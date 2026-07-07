@@ -8,6 +8,7 @@ from daemon import ipc
 from tui.controller import TraceController
 from tui.views.agents import AgentsView
 from tui.views.commits import CommitsView
+from tui.views.mcp import MCPView
 from tui.views.workspace import WorkspaceView
 
 
@@ -32,7 +33,7 @@ class TraceApp(App):
             with TabPane("Workspace", id="tab-workspace"):
                 yield WorkspaceView(self._controller)
             with TabPane("MCP", id="tab-mcp"):
-                yield Static("mcp", id="body-mcp")
+                yield MCPView(self._controller)
         yield Static("", id="status-line")
         yield Footer()
 

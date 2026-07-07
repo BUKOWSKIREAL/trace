@@ -106,6 +106,29 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
                 # agents view is populated from the preset agents
                 self.assertGreaterEqual(len(app.query_one(AgentsView).agent_list.children), 5)
 
+    async def test_mcp_tab_hosts_mcp_view(self):
+        import tempfile
+        from pathlib import Path as _Path
+        from core.repository import Repository
+        from tui.views.mcp import MCPView
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = _Path(tmp)
+            repo = Repository(ws)
+            repo.init_if_needed()
+            controller = TraceController(repo, ws)
+
+            daemon = _FakeDaemon()
+            daemon.repo = repo
+            daemon.workspace = ws
+
+            app = TraceApp(daemon=daemon, controller=controller)
+            async with app.run_test() as pilot:
+                await pilot.pause()
+                view = app.query_one(MCPView)
+                self.assertIsInstance(view, MCPView)
+                self.assertEqual(len(view.mcp_list.children), 4)
+
 
 if __name__ == "__main__":
     unittest.main()
