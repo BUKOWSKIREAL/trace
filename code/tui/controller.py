@@ -128,3 +128,19 @@ class TraceController:
             return {"ok": True, "summary": self._repo.workspace_summary()}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": str(exc)}
+
+    def list_mcp_setup(self) -> dict[str, Any]:
+        try:
+            from mcp.setup import McpSetup
+
+            return {"ok": True, "rows": McpSetup(self._workspace).list_rows()}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def install_mcp_server(self, server_id: str) -> dict[str, Any]:
+        try:
+            from mcp.setup import McpSetup
+
+            return McpSetup(self._workspace).install(server_id)
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc), "server_id": server_id}

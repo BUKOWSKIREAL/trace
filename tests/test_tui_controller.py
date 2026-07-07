@@ -188,5 +188,53 @@ class TraceControllerAgentsWorkspace(unittest.TestCase):
         self.assertEqual(result["error"], "boom")
 
 
+class TraceControllerMcp(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.ws = Path(self._tmp.name).resolve()
+        self.ws.mkdir(exist_ok=True)
+        self.repo = Repository(self.ws)
+        self.repo.init_if_needed()
+        self.controller = TraceController(self.repo, self.ws)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_list_mcp_setup_ok(self):
+        result = self.controller.list_mcp_setup()
+        self.assertTrue(result["ok"])
+        ids = [row["id"] for row in result["rows"]]
+        self.assertEqual(ids, ["codex", "claude", "opencode", "other"])
+
+    def test_install_other_returns_not_ok(self):
+        result = self.controller.install_mcp_server("other")
+        self.assertFalse(result["ok"])
+        self.assertIn("error", result)
+
+    def test_install_codex_writes_config(self):
+        import tempfile
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as home_dir:
+            with patch.object(Path, "home", return_value=Path(home_dir)):
+                result = self.controller.install_mcp_server("codex")
+            codex_dir = Path(home_dir) / ".codex"
+            self.assertTrue(result["ok"], result)
+            self.assertTrue((codex_dir / "config.toml").exists())
+            self.assertTrue((codex_dir / "hooks.json").exists())
+
+    def test_list_mcp_setup_wraps_error(self):
+        from unittest.mock import patch
+
+        def _boom(*_a, **_kw):
+            raise RuntimeError("boom")
+
+        controller = TraceController(self.repo, self.ws)
+        with patch("mcp.setup.McpSetup.list_rows", side_effect=_boom):
+            result = controller.list_mcp_setup()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "boom")
+
+
 if __name__ == "__main__":
     unittest.main()
