@@ -69,9 +69,13 @@ class MCPView(Widget):
         return self.query_one("#mcp-list", ListView)
 
     async def on_mount(self) -> None:
+        if self._controller is None:
+            return
         await self.refresh_setup()
 
     async def refresh_setup(self) -> None:
+        if self._controller is None:
+            return
         result = self._controller.list_mcp_setup()
         rows = result.get("rows", []) if result.get("ok") else []
         self._rows_by_id = {row["id"]: row for row in rows}

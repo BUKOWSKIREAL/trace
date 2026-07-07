@@ -63,9 +63,13 @@ class AgentsView(Widget):
         return sum(1 for a in self._agents if a.get("commit_count", 0) > 0)
 
     async def on_mount(self) -> None:
+        if self._controller is None:
+            return
         await self.refresh_agents()
 
     async def refresh_agents(self) -> None:
+        if self._controller is None:
+            return
         result = self._controller.list_agents()
         self._agents = result.get("agents", []) if result.get("ok") else []
 

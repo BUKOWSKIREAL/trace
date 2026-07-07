@@ -129,6 +129,55 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
                 self.assertIsInstance(view, MCPView)
                 self.assertEqual(len(view.mcp_list.children), 4)
 
+    async def test_pick_workspace_mode_mounts_picker_screen(self):
+        from tui.views.workspace import WorkspacePickerScreen
+
+        daemon = _FakeDaemon()
+        app = TraceApp(daemon=daemon, pick_workspace=True)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            self.assertIsInstance(app.screen, WorkspacePickerScreen)
+
+    async def test_pick_mode_serve_workspace_starts_daemon_and_pops_picker(self):
+        import tempfile
+        from pathlib import Path as _Path
+        from core.repository import Repository
+        from tui.views.workspace import WorkspacePickerScreen
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = _Path(tmp)
+            repo = Repository(ws)
+            repo.init_if_needed()
+            daemon = _FakeDaemon()
+            daemon.repo = repo
+
+            app = TraceApp(daemon=daemon, pick_workspace=True)
+            async with app.run_test() as pilot:
+                await pilot.pause()
+                self.assertIsInstance(app.screen, WorkspacePickerScreen)
+                app.serve_workspace(ws)
+                await pilot.pause()
+                self.assertTrue(daemon.started)
+                self.assertEqual(daemon.workspace, ws)
+                # picker is popped; the active screen is now the main app screen
+                self.assertNotIsInstance(app.screen, WorkspacePickerScreen)
+                # controller got bound
+                self.assertIsNotNone(app._controller)
+
+    async def test_pick_mode_cancel_exits_app(self):
+        from tui.views.workspace import WorkspacePickerScreen
+
+        daemon = _FakeDaemon()
+        app = TraceApp(daemon=daemon, pick_workspace=True)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            screen = app.screen
+            self.assertIsInstance(screen, WorkspacePickerScreen)
+            screen.action_cancel()
+            await pilot.pause()
+            # app.exit was called with 0
+            self.assertEqual(app.return_value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

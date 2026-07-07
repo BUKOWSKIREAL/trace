@@ -92,9 +92,13 @@ class CommitsView(Widget):
         return self.query_one("#commit-list", ListView)
 
     async def on_mount(self) -> None:
+        if self._controller is None:
+            return
         await self.refresh_commits()
 
     async def refresh_commits(self) -> None:
+        if self._controller is None:
+            return
         result = self._controller.list_commits()
         commits = result.get("commits", []) if result.get("ok") else []
         self._commits_by_id = {c["id"]: c for c in commits}
