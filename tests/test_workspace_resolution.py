@@ -70,7 +70,7 @@ class TestStatePersistence(unittest.TestCase):
 
 
 class TestResolveWorkspace(unittest.TestCase):
-    """main.resolve_workspace 的四段优先级。"""
+    """main.resolve_startup_workspace 的四段优先级。"""
 
     def setUp(self):
         self._real_home = os.environ.get("HOME")
@@ -102,51 +102,40 @@ class TestResolveWorkspace(unittest.TestCase):
 
     def test_explicit_workspace_wins(self):
         with tempfile.TemporaryDirectory() as td:
-            out = self.main_mod.resolve_workspace(
+            ws, needs_picker = self.main_mod.resolve_startup_workspace(
                 self._args(workspace=Path(td)), self.log)
-            self.assertEqual(out, Path(td).resolve())
+            self.assertEqual(ws, Path(td).resolve())
+            self.assertFalse(needs_picker)
 
-    def test_explicit_workspace_nonexistent_returns_none(self):
-        out = self.main_mod.resolve_workspace(
+    def test_explicit_workspace_nonexistent_returns_no_picker(self):
+        # bad --workspace is a hard error: workspace=None but no picker.
+        ws, needs_picker = self.main_mod.resolve_startup_workspace(
             self._args(workspace=Path("/totally/does/not/exist")), self.log)
-        self.assertIsNone(out)
+        self.assertIsNone(ws)
+        self.assertFalse(needs_picker)
 
     def test_last_memory_used_silently(self):
         with tempfile.TemporaryDirectory() as td:
             self.state_mod.save_last_workspace(Path(td))
-            out = self.main_mod.resolve_workspace(self._args(), self.log)
-            self.assertEqual(out, Path(td).resolve())
+            ws, needs_picker = self.main_mod.resolve_startup_workspace(
+                self._args(), self.log)
+            self.assertEqual(ws, Path(td).resolve())
+            self.assertFalse(needs_picker)
 
-    def test_choose_flag_invokes_picker(self):
-        with tempfile.TemporaryDirectory() as chosen:
-            with patch.object(
-                self.main_mod,
-                "_pick_workspace",
-                return_value=Path(chosen),
-            ) as mock_picker:
-                out = self.main_mod.resolve_workspace(
-                    self._args(choose=True), self.log)
-                self.assertEqual(out.resolve(), Path(chosen).resolve())
-                mock_picker.assert_called_once()
-
-    def test_picker_cancelled_returns_none(self):
-        """用户在 picker 里点取消 → resolve 返 None → main 优雅退出。"""
-        with patch.object(self.main_mod, "_pick_workspace", return_value=None):
-            out = self.main_mod.resolve_workspace(
+    def test_choose_flag_returns_pick_needed_even_with_memory(self):
+        with tempfile.TemporaryDirectory() as td:
+            self.state_mod.save_last_workspace(Path(td))
+            ws, needs_picker = self.main_mod.resolve_startup_workspace(
                 self._args(choose=True), self.log)
-            self.assertIsNone(out)
+            self.assertIsNone(ws)
+            self.assertTrue(needs_picker)
 
-    def test_no_memory_no_args_invokes_picker(self):
-        """既没 --workspace 也没记忆 → 自动弹 picker。"""
-        with tempfile.TemporaryDirectory() as chosen:
-            with patch.object(
-                self.main_mod,
-                "_pick_workspace",
-                return_value=Path(chosen),
-            ) as mock_picker:
-                out = self.main_mod.resolve_workspace(self._args(), self.log)
-                self.assertEqual(out.resolve(), Path(chosen).resolve())
-                mock_picker.assert_called_once_with(None)
+    def test_no_memory_no_args_returns_pick_needed(self):
+        """既没 --workspace 也没记忆 → 进 TUI 选择屏。"""
+        ws, needs_picker = self.main_mod.resolve_startup_workspace(
+            self._args(), self.log)
+        self.assertIsNone(ws)
+        self.assertTrue(needs_picker)
 
 
 if __name__ == "__main__":
