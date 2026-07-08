@@ -3,15 +3,6 @@ revision = 3
 requires-python = ">=3.10, <3.14"
 
 [[package]]
-name = "altgraph"
-version = "0.17.5"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7e/f8/97fdf103f38fed6792a1601dbc16cc8aac56e7459a9fff08c812d8ae177a/altgraph-0.17.5.tar.gz", hash = "sha256:c87b395dd12fabde9c99573a9749d67da8d29ef9de0125c7f536699b4a9bc9e7", size = 48428, upload-time = "2025-11-21T20:35:50.583Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/ba/000a1996d4308bc65120167c21241a3b205464a2e0b58deda26ae8ac21d1/altgraph-0.17.5-py2.py3-none-any.whl", hash = "sha256:f3a22400bce1b0c701683820ac4f3b159cd301acab067c51c653e06961600597", size = 21228, upload-time = "2025-11-21T20:35:49.444Z" },
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -145,18 +136,6 @@ wheels = [
 ]
 
 [[package]]
-name = "macholib"
-version = "1.16.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "altgraph" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/10/2f/97589876ea967487978071c9042518d28b958d87b17dceb7cdc1d881f963/macholib-1.16.4.tar.gz", hash = "sha256:f408c93ab2e995cd2c46e34fe328b130404be143469e41bc366c807448979362", size = 59427, upload-time = "2025-11-22T08:28:38.373Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/d1/a9f36f8ecdf0fb7c9b1e78c8d7af12b8c8754e74851ac7b94a8305540fc7/macholib-1.16.4-py2.py3-none-any.whl", hash = "sha256:da1a3fa8266e30f0ce7e97c6a54eefaae8edd1e5f86f3eb8b95457cae90265ea", size = 38117, upload-time = "2025-11-22T08:28:36.939Z" },
-]
-
-[[package]]
 name = "markdown-it-py"
 version = "4.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -195,19 +174,6 @@ wheels = [
 ]
 
 [[package]]
-name = "modulegraph"
-version = "0.19.7"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "altgraph" },
-    { name = "setuptools" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/20/fa/c471f46fa1696309b806d6c663d599525925a5c13cf1371a02587a265109/modulegraph-0.19.7.tar.gz", hash = "sha256:9ad8a81148ba1d90ade66617a153786f7d7cf6a88de83ee28e251183122c2a57", size = 88618, upload-time = "2025-11-22T08:22:43.858Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/c1/3eff0be83439f0408866eaacd4106c9d19b762cba66bcf0d0a523a6f6620/modulegraph-0.19.7-py2.py3-none-any.whl", hash = "sha256:139f89042c9912777ba4bbf1d5496591c6ad780110ea3082c11e8737cf82cacc", size = 35151, upload-time = "2025-11-22T08:22:42.239Z" },
-]
-
-[[package]]
 name = "openpyxl"
 version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
@@ -226,15 +192,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d7/f1/e7a6dd94a8d4a5626c03e4e99c87f241ba9e350cd9e6d75123f992427270/packaging-26.2.tar.gz", hash = "sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661", size = 228134, upload-time = "2026-04-24T20:15:23.917Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/df/b2/87e62e8c3e2f4b32e5fe99e0b86d576da1312593b39f47d8ceef365e95ed/packaging-26.2-py3-none-any.whl", hash = "sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e", size = 100195, upload-time = "2026-04-24T20:15:22.081Z" },
-]
-
-[[package]]
-name = "pefile"
-version = "2024.8.26"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/03/4f/2750f7f6f025a1507cd3b7218691671eecfd0bbebebe8b39aa0fe1d360b8/pefile-2024.8.26.tar.gz", hash = "sha256:3ff6c5d8b43e8c37bb6e6dd5085658d658a7a0bdcd20b6a07b1fcfc1c4e9d632", size = 76008, upload-time = "2024-08-26T20:58:38.155Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/54/16/12b82f791c7f50ddec566873d5bdd245baa1491bac11d15ffb98aecc8f8b/pefile-2024.8.26-py3-none-any.whl", hash = "sha256:76f8b485dcd3b1bb8166f1128d395fa3d87af26360c2358fb75b80019b957c6f", size = 74766, upload-time = "2024-08-26T21:01:02.632Z" },
 ]
 
 [[package]]
@@ -351,21 +308,6 @@ wheels = [
 ]
 
 [[package]]
-name = "py2app"
-version = "0.28.10"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "altgraph" },
-    { name = "macholib" },
-    { name = "modulegraph" },
-    { name = "packaging" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/93/82/79a2aaaf86c44c6018edce1a028cf821acec4c3ca63e2b5781f16822c99f/py2app-0.28.10.tar.gz", hash = "sha256:fd38f4a0083d4d1e91ea336eaef678b99d9e1b95ac6302315cad22fa5e859cb1", size = 1143601, upload-time = "2026-02-13T20:50:02.289Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/d8/a04a88b182613370a262f674929f0e284ea04e1803f2d38fc5639fbec2d7/py2app-0.28.10-py3-none-any.whl", hash = "sha256:bdb0cd2cbfa5160b5b11b8d612f6eb92d484a0282801e85b159f1930cd834714", size = 837349, upload-time = "2026-02-13T20:49:59.98Z" },
-]
-
-[[package]]
 name = "pyfiglet"
 version = "1.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -384,47 +326,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pyinstaller"
-version = "6.20.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "altgraph" },
-    { name = "macholib", marker = "sys_platform == 'darwin'" },
-    { name = "packaging" },
-    { name = "pefile", marker = "sys_platform == 'win32'" },
-    { name = "pyinstaller-hooks-contrib" },
-    { name = "pywin32-ctypes", marker = "sys_platform == 'win32'" },
-    { name = "setuptools" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/46/60/d03d52e6690d4e9caf333dcd14550cde634ce6c118b3bc8fa3112c3186fd/pyinstaller-6.20.0.tar.gz", hash = "sha256:95c5c7e03d5d61e9dfb8ef259c699cf492bb1041beb6dbe83696608cec07347a", size = 4048728, upload-time = "2026-04-22T20:59:36.96Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d0/e4/e228d6d1bbb7fd62dc660a8fb202a583b023d3a3624ca95d1a9290ee4d6a/pyinstaller-6.20.0-py3-none-macosx_10_13_universal2.whl", hash = "sha256:bf3be4e1284ee78ddccba5e29f99443a12a7b4673168288ffc4c9d38c6f7b90e", size = 1047642, upload-time = "2026-04-22T20:58:32.006Z" },
-    { url = "https://files.pythonhosted.org/packages/ce/bd/afb631bcb3f9040efebd4f6d067f0828b51710818f69fb41a2d4b7787f52/pyinstaller-6.20.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:72ae9c1fdea134afa791f58bdc9a1934d5c7609753c111e0026bfc272b32b712", size = 742494, upload-time = "2026-04-22T20:58:36.285Z" },
-    { url = "https://files.pythonhosted.org/packages/76/08/0729a5bac14754150e5d83b39d87d842eb42b0bffcaa03dbad6252e23a39/pyinstaller-6.20.0-py3-none-manylinux2014_i686.whl", hash = "sha256:1031bcc307f3fbeffd4e162723e64d46dbf591c82dd0997413afb2a07328b941", size = 754191, upload-time = "2026-04-22T20:58:40.603Z" },
-    { url = "https://files.pythonhosted.org/packages/e6/82/bc0ee4c7b97db1958eb651e0da9fb1e672e5ae53ca8867fd97701de52906/pyinstaller-6.20.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:8df3b3f347659fa2562d8d193a98ad4600133b8b8d07c268df89e4154376750e", size = 751902, upload-time = "2026-04-22T20:58:44.7Z" },
-    { url = "https://files.pythonhosted.org/packages/3d/e7/770002d6aaa54173881cb2c49bb195ba67b97bf39bac1cdf320f28401629/pyinstaller-6.20.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:b0d3cc9dd8120d448459bd3880a12e2f9774c51443af49047801446377999a59", size = 748634, upload-time = "2026-04-22T20:58:48.579Z" },
-    { url = "https://files.pythonhosted.org/packages/fe/db/68ba1fccb71278b2124fb90b37b7c8c0bc4c1173fba45b94466df3d9cb7f/pyinstaller-6.20.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:03696bb6350177c6bc23bcaf78e71a33c4a89b6754dd90d1be2f318e978c918b", size = 748490, upload-time = "2026-04-22T20:58:52.749Z" },
-    { url = "https://files.pythonhosted.org/packages/03/0f/ac77ffa996a56be3d5c8f85734a007f8347240691657f9704e7de2527fa3/pyinstaller-6.20.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:6357f1699f6af84f37e7367f031d4f68abdba65543b83990c9e8f5a4cebed0b7", size = 747650, upload-time = "2026-04-22T20:58:57.093Z" },
-    { url = "https://files.pythonhosted.org/packages/e0/56/1ee91c3a2bc10ca1f36da10a6fd55ff7efc4dec367171eb25992a827874f/pyinstaller-6.20.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:0ab39c690abad26ba148e8f664f0478acc82a733997f4f22e757774832802da9", size = 747413, upload-time = "2026-04-22T20:59:01.174Z" },
-    { url = "https://files.pythonhosted.org/packages/d7/55/ae264339996953c4cdf9d89d916a0a8fa26a83cf917a742fff8b9d5f3fe8/pyinstaller-6.20.0-py3-none-win32.whl", hash = "sha256:9a7637e8e44b4387b13667fdcaac86ab6b29c446c16d34d8401539b81838759c", size = 1331584, upload-time = "2026-04-22T20:59:07.201Z" },
-    { url = "https://files.pythonhosted.org/packages/76/8c/300f57578882cce259bfb5ae56fda3b69caa3fe9df40a176c719920ea6e2/pyinstaller-6.20.0-py3-none-win_amd64.whl", hash = "sha256:d588844e890ee80c4365867f98146636e1849bbca8e4284bbf0c809aff0f161a", size = 1391851, upload-time = "2026-04-22T20:59:14.024Z" },
-    { url = "https://files.pythonhosted.org/packages/8a/ea/b2f8e1642aecda78c0b75c7321f708e49e10bb3c00dd4f148c40761a1527/pyinstaller-6.20.0-py3-none-win_arm64.whl", hash = "sha256:bd53282c0a73e5c95573e1ddc8e5d564d4932bec91efbaed4dc5fdff9c2ae7f2", size = 1332259, upload-time = "2026-04-22T20:59:20.509Z" },
-]
-
-[[package]]
-name = "pyinstaller-hooks-contrib"
-version = "2026.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging" },
-    { name = "setuptools" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/67/f4452d68793fb15beba4f19ef39a38a8822f0da7452b503c400d5a21f5c1/pyinstaller_hooks_contrib-2026.5.tar.gz", hash = "sha256:f066dfca8f7c45ff6336c9cf9fe25b4e48bfeb322a1aa24faaedfb8a8d1b0b08", size = 173689, upload-time = "2026-05-04T22:36:55.124Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f6/5c/fd465d11da4d12b50d7eb5d2ee2ceb780d8d049dbb489f3828d131e387af/pyinstaller_hooks_contrib-2026.5-py3-none-any.whl", hash = "sha256:ea1535783fbdac4626351709e83f3ea80b681d3a4745763ebb407b5e27342eb9", size = 457314, upload-time = "2026-05-04T22:36:53.598Z" },
-]
-
-[[package]]
 name = "pymupdf"
 version = "1.27.2.3"
 source = { registry = "https://pypi.org/simple" }
@@ -437,48 +338,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/69/49/4f742451f980840829fc00ba158bebb25d389c846d8f4f8c65936ee55de8/pymupdf-1.27.2.3-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:580983849c64a08d08344ca3d1580e87c01f046a8392421797bc850efd72a5b6", size = 25184609, upload-time = "2026-04-24T14:10:22.911Z" },
     { url = "https://files.pythonhosted.org/packages/f6/3f/3853d6608f394faf6eec2bd4e8ea9f6a00beea329b071abdb29f4164cc3d/pymupdf-1.27.2.3-cp310-abi3-win32.whl", hash = "sha256:a5c1088a87189891a4946ab314a14b7934ac4c5b6077f7e74ebee956f8906d0e", size = 18019286, upload-time = "2026-04-24T14:10:34.239Z" },
     { url = "https://files.pythonhosted.org/packages/44/47/5fb10fe73f96b31253a41647c362ea9e0380920bddf16028414a051247fc/pymupdf-1.27.2.3-cp310-abi3-win_amd64.whl", hash = "sha256:d20f68ef15195e073071dbc4ae7455257c7889af7584e39df490c0a92728526e", size = 19249102, upload-time = "2026-04-24T14:10:46.72Z" },
-]
-
-[[package]]
-name = "pyobjc-core"
-version = "12.2.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b4/b1/729f7458a63758bd21716648a8abcd9a0c8f2d2e9897763c8a1a1c7fd31b/pyobjc_core-12.2.1.tar.gz", hash = "sha256:7a7b9b018402342cf32bf1956366896350fbe5c0478cb3ef59778f77abed7f07", size = 1063383, upload-time = "2026-06-19T16:19:39.357Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/62/80fe6b6bea9e9e7abe2e7a91bfd22115219b2263e435d2da09cf480b6f49/pyobjc_core-12.2.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:aa5c889961d79d7704f17eeb27f80ee791335819c1bb14babeff7b9ea665b5f0", size = 6486390, upload-time = "2026-06-19T13:29:49.457Z" },
-    { url = "https://files.pythonhosted.org/packages/92/87/16564ef5e4568ee0edd9e712d8111dc8b67621d6bb6ff430646ee2d637dd/pyobjc_core-12.2.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:24b76a63caf0b5369d4a377c7c0438cd70df81539057af3db839bfaa3579e04a", size = 6484662, upload-time = "2026-06-19T16:04:44.979Z" },
-    { url = "https://files.pythonhosted.org/packages/8c/88/300ad283bed0c971c52dcac6f70113e138169d4ce6d856ddd03d16081e51/pyobjc_core-12.2.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:a64232bb27ed101d4adc7d42b0e64a6d3331aac7bee7861c037a6777a163f10b", size = 6433347, upload-time = "2026-06-19T16:04:49.341Z" },
-    { url = "https://files.pythonhosted.org/packages/3e/1e/b9b0ddffae66996b8779f1f7958adc9f21c13a0448cd3be8d7fe589b5b0f/pyobjc_core-12.2.1-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:af101222762665a4125157906cb4b23f5d5a63d3851d5e0504f72a1eaaa2cfd2", size = 6436004, upload-time = "2026-06-19T16:04:53.257Z" },
-    { url = "https://files.pythonhosted.org/packages/8f/26/bd309ede07784c6e5fac4b440c90a5f72a66da7859ed303a9392fe8a5f3f/pyobjc_core-12.2.1-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:efe465e3ecc6fc73f7c7622620345d134a8d34564ab1c29d8247e45f4ed55071", size = 6687044, upload-time = "2026-06-19T16:04:57.42Z" },
-]
-
-[[package]]
-name = "pyobjc-framework-cocoa"
-version = "12.2.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pyobjc-core" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/51/34/fbe38a204643aa4e1b91391cdce07a34da565a69171ebcad08de7438a556/pyobjc_framework_cocoa-12.2.1.tar.gz", hash = "sha256:b94b37fe5730e5ae1fb0052912cd174e6ec329b0bfba4a012ae5db1014b5864b", size = 3125751, upload-time = "2026-06-19T16:20:05.159Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/c5/f6a5458cc5a598baa7a79ffe86248560c631f5a86f4a3c678fb6a815e78b/pyobjc_framework_cocoa-12.2.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:05443c1494532779cccff83e9792fdd6f0a4800cac56620132bf28e0bf966e9d", size = 387303, upload-time = "2026-06-19T16:07:35.831Z" },
-    { url = "https://files.pythonhosted.org/packages/f4/d6/dc66ea8519a0475efbccf73f82cc28066339bb300a27f5e1bf91ab1d7002/pyobjc_framework_cocoa-12.2.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:dc6da84f4fc62cc25463bbb85e77a57b8d5ac6caf9a60702daf2edb601332f15", size = 387298, upload-time = "2026-06-19T16:07:37.412Z" },
-    { url = "https://files.pythonhosted.org/packages/f7/cf/1b3b32b2f28f66cc053c3438ef4e6df36a1591945bf05e7399da18d74553/pyobjc_framework_cocoa-12.2.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:28b9b8bab1c36efb94744786918752d0c1842f5fbb67e7d5ca97b5f736512080", size = 388113, upload-time = "2026-06-19T16:07:38.9Z" },
-    { url = "https://files.pythonhosted.org/packages/cc/46/68e8e4d926a2f70fed0437047bc3f9fe08af8fe620d94d80656ebc3cfa9b/pyobjc_framework_cocoa-12.2.1-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:3b74a78fa7803e547b32e5e8ec1b49987b52fe318383e793bc6cd49b80efbd9f", size = 388183, upload-time = "2026-06-19T16:07:40.483Z" },
-    { url = "https://files.pythonhosted.org/packages/2e/f3/dfc9af4c9eb2e5389c860ad5ef252be9fe456db09f39d537555dc5057aa1/pyobjc_framework_cocoa-12.2.1-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:dc2eaca2f13c7bcd8e41e51a372e47825dea9dd3126108760eed7ba883d2945c", size = 392275, upload-time = "2026-06-19T16:07:42.078Z" },
-]
-
-[[package]]
-name = "pystray"
-version = "0.19.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pillow" },
-    { name = "python-xlib", marker = "sys_platform == 'linux'" },
-    { name = "six" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/64/927a4b9024196a4799eba0180e0ca31568426f258a4a5c90f87a97f51d28/pystray-0.19.5-py2.py3-none-any.whl", hash = "sha256:a0c2229d02cf87207297c22d86ffc57c86c227517b038c0d3c59df79295ac617", size = 49068, upload-time = "2023-09-17T13:44:26.872Z" },
 ]
 
 [[package]]
@@ -528,27 +387,6 @@ wheels = [
 ]
 
 [[package]]
-name = "python-xlib"
-version = "0.33"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/86/f5/8c0653e5bb54e0cbdfe27bf32d41f27bc4e12faa8742778c17f2a71be2c0/python-xlib-0.33.tar.gz", hash = "sha256:55af7906a2c75ce6cb280a584776080602444f75815a7aff4d287bb2d7018b32", size = 269068, upload-time = "2022-12-25T18:53:00.824Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fc/b8/ff33610932e0ee81ae7f1269c890f697d56ff74b9f5b2ee5d9b7fa2c5355/python_xlib-0.33-py2.py3-none-any.whl", hash = "sha256:c3534038d42e0df2f1392a1b30a15a4ff5fdc2b86cfa94f072bf11b10a164398", size = 182185, upload-time = "2022-12-25T18:52:58.662Z" },
-]
-
-[[package]]
-name = "pywin32-ctypes"
-version = "0.2.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/85/9f/01a1a99704853cb63f253eea009390c88e7131c67e66a0a02099a8c917cb/pywin32-ctypes-0.2.3.tar.gz", hash = "sha256:d162dc04946d704503b2edc4d55f3dba5c1d539ead017afa00142c38b9885755", size = 29471, upload-time = "2024-08-14T10:15:34.626Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/3d/8161f7711c017e01ac9f008dfddd9410dff3674334c233bde66e7ba65bbf/pywin32_ctypes-0.2.3-py3-none-any.whl", hash = "sha256:8a1513379d709975552d202d942d9837758905c8d01eb82b8bcc30918929e7b8", size = 30756, upload-time = "2024-08-14T10:15:33.187Z" },
-]
-
-[[package]]
 name = "rich"
 version = "15.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -559,33 +397,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz", hash = "sha256:edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36", size = 230680, upload-time = "2026-04-12T08:24:00.75Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl", hash = "sha256:33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb", size = 310654, upload-time = "2026-04-12T08:24:02.83Z" },
-]
-
-[[package]]
-name = "rumps"
-version = "0.4.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pyobjc-framework-cocoa" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b2/e2/2e6a47951290bd1a2831dcc50aec4b25d104c0cf00e8b7868cbd29cf3bfe/rumps-0.4.0.tar.gz", hash = "sha256:17fb33c21b54b1e25db0d71d1d793dc19dc3c0b7d8c79dc6d833d0cffc8b1596", size = 39257, upload-time = "2022-10-15T05:15:10.386Z" }
-
-[[package]]
-name = "setuptools"
-version = "82.0.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4f/db/cfac1baf10650ab4d1c111714410d2fbb77ac5a616db26775db562c8fab2/setuptools-82.0.1.tar.gz", hash = "sha256:7d872682c5d01cfde07da7bccc7b65469d3dca203318515ada1de5eda35efbf9", size = 1152316, upload-time = "2026-03-09T12:47:17.221Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl", hash = "sha256:a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb", size = 1006223, upload-time = "2026-03-09T12:47:15.026Z" },
-]
-
-[[package]]
-name = "six"
-version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
 ]
 
 [[package]]
@@ -644,26 +455,21 @@ wheels = [
 [[package]]
 name = "trace"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "openpyxl" },
     { name = "pillow" },
     { name = "psutil" },
     { name = "pyfiglet" },
     { name = "pymupdf" },
-    { name = "pystray", marker = "sys_platform != 'darwin'" },
     { name = "python-docx" },
     { name = "python-pptx" },
-    { name = "rumps", marker = "sys_platform == 'darwin'" },
     { name = "textual" },
-    { name = "ttkbootstrap" },
     { name = "watchdog" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "py2app", marker = "sys_platform == 'darwin'" },
-    { name = "pyinstaller" },
     { name = "pytest" },
 ]
 
@@ -674,33 +480,14 @@ requires-dist = [
     { name = "psutil", specifier = ">=5.9.0" },
     { name = "pyfiglet", specifier = ">=1.0.0" },
     { name = "pymupdf", specifier = ">=1.23.0" },
-    { name = "pystray", marker = "sys_platform != 'darwin'", specifier = ">=0.19.0" },
     { name = "python-docx", specifier = ">=1.0.0" },
     { name = "python-pptx", specifier = ">=0.6.21" },
-    { name = "rumps", marker = "sys_platform == 'darwin'", specifier = ">=0.4.0" },
     { name = "textual", specifier = ">=0.60" },
-    { name = "ttkbootstrap", specifier = ">=1.10.0" },
     { name = "watchdog", specifier = ">=3.0.0" },
 ]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "py2app", marker = "sys_platform == 'darwin'", specifier = ">=0.28.8" },
-    { name = "pyinstaller", specifier = ">=6.0.0" },
-    { name = "pytest", specifier = ">=8.0.0" },
-]
-
-[[package]]
-name = "ttkbootstrap"
-version = "1.20.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pillow" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/88/bb1535edbd12e7b60223bee86241368b5d27043c001ef81d620ae8a56faf/ttkbootstrap-1.20.3.tar.gz", hash = "sha256:3350b80f79b0454c12558a7174c4bc4bd47905758843c3e8b0fbb19a0286fb69", size = 176262, upload-time = "2026-05-07T03:09:26.443Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/48/a5fd0d5d360e363f9bb289bef29b66103fd4ae1be1e3b6896a01b6e0f993/ttkbootstrap-1.20.3-py3-none-any.whl", hash = "sha256:95a05a4a663e3047be54edc220aa59c494a54f5c617a72a2c59a4bf634b97a5a", size = 191453, upload-time = "2026-05-07T03:09:24.935Z" },
-]
+dev = [{ name = "pytest", specifier = ">=8.0.0" }]
 
 [[package]]
 name = "typing-extensions"

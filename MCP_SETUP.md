@@ -39,7 +39,7 @@ python scripts/setup_cursor_mcp.py
 
 ### Codex CLI 配置
 
-推荐使用 Electron 操作台的 MCP 页面一键写入 `~/.codex/config.toml` 和
+推荐使用 Textual TUI 的 **MCP** 视图一键写入 `~/.codex/config.toml` 和
 `~/.codex/hooks.json`；它会替换旧的 `trace` section，避免 workspace 指向旧路径。
 
 手动配置时，在 `~/.codex/config.toml` 添加：
@@ -145,7 +145,7 @@ PYTHONPATH=code uv run python -m mcp.trace_server --workspace test_workspace
 1. 检查 `.mcp.json` 配置文件路径是否正确
 2. 确保 `command` 和 `args` 使用绝对路径
 3. Codex 配置中必须给 `mcp.trace_server` 设置 `PYTHONPATH=/path/to/project/code`
-4. 如果旧配置指向了旧 workspace，使用 Electron 操作台 MCP 页面重新一键添加
+4. 如果旧配置指向了旧 workspace，使用 TUI 的 **MCP** 视图重新一键添加
 5. 查看 agent 的日志文件获取详细错误信息
 
 ### 问题：工作区路径错误

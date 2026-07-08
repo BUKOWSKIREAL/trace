@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-本项目是 Trace，一个 Python + SQLite + watchdog 的多 CLI Agent 协作版本追踪器。
+本项目是 Trace，一个 Python + SQLite + watchdog + Textual 的多 CLI Agent 协作版本追踪器。
 
 ## 常用命令
 
@@ -8,17 +8,15 @@
 uv sync
 uv run python -m unittest discover -s tests
 uv run python code/main.py --workspace test_workspace
-cd electron_app && npm start -- --workspace=../test_workspace
+uv run python code/main.py --workspace test_workspace --headless
+uv run python code/main.py --choose
 bash scripts/demo.sh
-bash scripts/build_macos_app.sh
 ```
 
-Electron 操作台：
+TUI 操作台：
 
 ```bash
-cd electron_app
-npm install
-npm start -- --workspace=../test_workspace
+uv run python code/main.py --workspace test_workspace
 ```
 
 MCP 服务器测试：
@@ -31,9 +29,10 @@ uv run python -m unittest tests.test_trace_mcp_server
 ## 项目约定
 
 - Python 依赖通过 `uv` 管理，不要手动创建新的 venv 方案。
+- Phase 6 后 Trace 是纯 Python / Textual TUI 产品；不要重新引入旧桌面前端、系统托盘或平台打包链。
 - `test_workspace/` 是本地演示目录，不进入版本控制。
 - `.trace/` 是运行时仓库目录，不进入版本控制。
-- `dist/` 和 `build/` 是打包产物目录，不进入版本控制。
+- `dist/` 和 `build/` 是本地构建产物目录，不进入版本控制。
 - 文件版本存储以字节 blob 为准，handler 只负责 UI diff 展示。
 - `.docx/.pptx/.xlsx/.pdf/image` 等格式有专门 handler；未知格式走 `BinaryHandler`。
 - 修改 watcher、repository、batcher 时要跑完整测试。

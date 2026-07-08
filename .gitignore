@@ -27,11 +27,7 @@ env/
 *.swp
 *.swo
 
-# Node.js
-node_modules/
-electron_app/dist/
-electron_app/out/
-electron_app/renderer-dist/
+
 
 # Trace runtime / local workspaces
 .trace/

@@ -124,16 +124,15 @@ cat /path/to/workspace/.trace/trace_activity.jsonl
 {"timestamp": 1718123456.789, "agent": "cursor", "files": ["src/main.py"], "operation": "write", "source": "mcp", "confidence": 1.0}
 ```
 
-### 使用 Electron 操作台验证
+### 使用 Textual TUI 验证
 
-启动 Electron 操作台：
+启动 Trace TUI：
 
 ```bash
-cd electron_app
-npm start -- --workspace=/path/to/workspace
+uv run python code/main.py --workspace /path/to/workspace
 ```
 
-在"Timeline"页面中，你应该能看到标记为 "cursor" 的提交记录。
+在 **Commits** 视图中，你应该能看到标记为 "cursor" 的提交记录。
 
 ## 在 Cursor 中使用
 
