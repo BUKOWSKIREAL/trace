@@ -17,6 +17,7 @@ from mcp.setup import (  # noqa: E402
     TRACE_MCP_SERVER_NAME,
     TRACE_MCP_TOOL,
     McpSetup,
+    _path_in_text,
 )
 
 
@@ -93,14 +94,14 @@ class CodexInstallTests(unittest.TestCase):
             self.assertEqual(toml.count("[mcp_servers.trace]"), 1)
             self.assertEqual(toml.count("[mcp_servers.trace.env]"), 1)
             self.assertIn(TRACE_MCP_MODULE, toml)
-            self.assertIn(str(workspace), toml)
-            self.assertNotIn(str(old_workspace), toml)
+            self.assertTrue(_path_in_text(toml, workspace))
+            self.assertFalse(_path_in_text(toml, old_workspace))
             self.assertIn("[mcp_servers.node_repl]", toml)  # unrelated section preserved
 
             hooks = json.loads((home / ".codex" / "hooks.json").read_text(encoding="utf-8"))
             serialized = json.dumps(hooks)
-            self.assertIn(str(workspace), serialized)
-            self.assertNotIn(str(old_workspace), serialized)
+            self.assertTrue(_path_in_text(serialized, workspace))
+            self.assertFalse(_path_in_text(serialized, old_workspace))
             self.assertIn("echo keep-me", serialized)  # other PostToolUse entry preserved
             pre_matchers = [e.get("matcher") for e in hooks["hooks"]["PreToolUse"]]
             post_matchers = [e.get("matcher") for e in hooks["hooks"]["PostToolUse"]]
@@ -306,7 +307,7 @@ class ListRowsTests(unittest.TestCase):
             rows = McpSetup(workspace=workspace, home=Path(td).resolve() /"home").list_rows()
             other = rows[-1]
             self.assertIn(TRACE_MCP_MODULE, other["command"])
-            self.assertIn(str(workspace), other["command"])
+            self.assertTrue(_path_in_text(other["command"], workspace))
 
 
 class CommandLineTests(unittest.TestCase):

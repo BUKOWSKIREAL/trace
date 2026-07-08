@@ -120,6 +120,8 @@ def _run_headless(daemon, log: logging.Logger) -> int:
 
     signal.signal(signal.SIGINT, _signal)
     signal.signal(signal.SIGTERM, _signal)
+    if hasattr(signal, "SIGBREAK"):  # Windows: subprocess.CTRL_BREAK_EVENT
+        signal.signal(signal.SIGBREAK, _signal)
     log.info("Headless 模式 — Ctrl+C 退出。")
     try:
         while True:
