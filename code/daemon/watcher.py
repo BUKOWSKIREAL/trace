@@ -22,7 +22,6 @@ Watchdog 文件监听
 """
 
 import logging
-import os
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -117,11 +116,14 @@ class TraceHandler(FileSystemEventHandler):
 
     MAX_WORKERS = 8  # 线程池上限：git clone / npm install 时不让线程爆炸
 
-    def __init__(self, workspace: Path, batcher, *, ignore_patterns: list[str] | None = None):
+    def __init__(
+        self, workspace: Path, batcher, *, ignore_patterns: list[str] | None = None
+    ):
         self.workspace = workspace
         self.batcher = batcher
         self.ignore_patterns = list(ignore_patterns or [])
-        self.activity_recorder = None
+        self.activity_recorder: Any | None = None
+        self.trace_activity: Any | None = None
         self.deduper = PathDeduper()
         # 用线程池限流：原版裸 Thread.start() 在 git clone 时会同时起
         # 几百个线程，对系统资源冲击大
@@ -129,7 +131,7 @@ class TraceHandler(FileSystemEventHandler):
             max_workers=self.MAX_WORKERS,
             thread_name_prefix="trace-handler",
         )
-        # Task 4.1：可由 menubar 设置的两个状态
+        # 可由 UI/配置设置的两个状态：
         # paused=True 时，dispatch 直接 return，事件不进 batcher
         # override_agent 不为 None 时，_attribute 强制返回该 agent
         self.paused: bool = False

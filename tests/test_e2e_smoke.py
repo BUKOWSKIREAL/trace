@@ -29,7 +29,7 @@ ROOT = Path(__file__).parent.parent
 CODE_DIR = ROOT / "code"
 
 
-IDLE_WAIT = 3.5  # > batcher.IDLE_WINDOW_SECONDS(2.0) + 安全余量
+IDLE_WAIT = 6.0  # > attribution/transcript scan + batcher.IDLE_WINDOW_SECONDS(2.0)
 STARTUP_WAIT = 5.0  # 等"守护进程运行中" 出现的最长时间
 
 

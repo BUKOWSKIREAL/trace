@@ -2,7 +2,7 @@
 Runtime configuration for the Trace daemon.
 
 Loads `.trace/config.json`, exposes typed accessors, and supports hot updates
-from the menubar without restarting the watcher.
+from the TUI without restarting the watcher.
 """
 
 from __future__ import annotations

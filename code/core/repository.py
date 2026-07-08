@@ -346,7 +346,9 @@ class Repository:
         """当前工作区概览：路径、db、commit/snapshot/agent 计数。"""
         conn = get_connection(self.db_path)
         commit_count = conn.execute("SELECT COUNT(*) AS n FROM commits").fetchone()["n"]
-        snapshot_count = conn.execute("SELECT COUNT(*) AS n FROM snapshots").fetchone()["n"]
+        snapshot_count = conn.execute("SELECT COUNT(*) AS n FROM snapshots").fetchone()[
+            "n"
+        ]
         agent_count = conn.execute("SELECT COUNT(*) AS n FROM agents").fetchone()["n"]
         return {
             "workspace": str(self.workspace),
@@ -362,7 +364,9 @@ class Repository:
 
         return load_config(self.config_path)
 
-    def _disk_manifest(self, extra_ignore_patterns: list[str] | None = None) -> dict[str, str]:
+    def _disk_manifest(
+        self, extra_ignore_patterns: list[str] | None = None
+    ) -> dict[str, str]:
         """Build a manifest from the current workspace on disk."""
         manifest: dict[str, str] = {}
         for root, dirs, files in os.walk(self.workspace):
@@ -505,7 +509,9 @@ class Repository:
             if backup_id is not None:
                 logger.info("已备份当前状态到 commit #%d", backup_id)
 
-        mark_restore_window(self.workspace, "revert_agent", detection_method="revert_agent")
+        mark_restore_window(
+            self.workspace, "revert_agent", detection_method="revert_agent"
+        )
 
         head_manifest = self._normalize_manifest(self._load_manifest(head))
         for rel, sha in target_manifest.items():
@@ -524,7 +530,9 @@ class Repository:
             if path.exists() and path.is_file():
                 path.unlink()
 
-        mark_restore_window(self.workspace, "revert_agent", detection_method="revert_agent")
+        mark_restore_window(
+            self.workspace, "revert_agent", detection_method="revert_agent"
+        )
         revert_commit_id = self._write_manifest_commit(
             agent="human",
             manifest=target_manifest,
@@ -535,7 +543,9 @@ class Repository:
             ),
             summary=f"撤销 agent {agent} 的全部变更",
         )
-        mark_restore_window(self.workspace, "revert_agent", detection_method="revert_agent")
+        mark_restore_window(
+            self.workspace, "revert_agent", detection_method="revert_agent"
+        )
         if revert_commit_id is None:
             raise RuntimeError("撤销后未能写入新的 manifest commit")
         logger.info(

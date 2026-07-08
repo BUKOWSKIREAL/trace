@@ -153,7 +153,9 @@ def _run_with_tui(
     if not pick_workspace and controller_workspace is not None:
         from tui.controller import TraceController
 
-        controller = TraceController(getattr(daemon, "repo", None), controller_workspace)
+        controller = TraceController(
+            getattr(daemon, "repo", None), controller_workspace
+        )
 
     app = TraceApp(
         daemon=daemon,
@@ -162,30 +164,6 @@ def _run_with_tui(
     )
     try:
         app.run()
-    finally:
-        daemon.stop()
-        log.info("Trace已退出。")
-    return 0
-
-
-def _run_with_menubar(daemon, log: logging.Logger) -> int:
-    """带菜单栏模式：TraceApp 接管主线程跑系统托盘。"""
-    from menubar.app import TraceApp
-
-    app = TraceApp(daemon=daemon)
-
-    def _signal(signum, frame):
-        log.info("收到退出信号 %d，请求关闭菜单栏...", signum)
-        try:
-            app.tray.stop()
-        except Exception as e:
-            log.warning("tray.stop 失败: %s", e)
-
-    signal.signal(signal.SIGINT, _signal)
-    signal.signal(signal.SIGTERM, _signal)
-
-    try:
-        app.start()
     finally:
         daemon.stop()
         log.info("Trace已退出。")
@@ -214,7 +192,9 @@ def main() -> int:
 
     if args.headless:
         if workspace is None:
-            log.error("headless 模式必须有 --workspace 或上次工作区；TUI 选择屏不可用。")
+            log.error(
+                "headless 模式必须有 --workspace 或上次工作区；TUI 选择屏不可用。"
+            )
             return 1
         return _run_headless(daemon, log)
     return _run_with_tui(

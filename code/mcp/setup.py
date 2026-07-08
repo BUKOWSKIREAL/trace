@@ -1,21 +1,19 @@
-"""MCP setup helpers — Python port of the Electron console's MCP panel.
+"""MCP setup helpers for the Textual TUI.
 
 Detects and installs Trace MCP configuration for Codex, Claude Code and OpenCode.
 The TUI view layer talks to this module through ``TraceController``; it never
 touches the filesystem directly.
 
-The original logic lived in ``electron_app/main.js`` (~590 lines). The TUI is a
-pure-Python product, so the bundled-python / portable-exe / Homebrew-binary
-detection is intentionally dropped: the only launch spec we need is
+Trace is a pure-Python product, so the launch spec is
 ``sys.executable -m mcp.trace_server --workspace <ws>`` with ``PYTHONPATH``
 pointing at the project's ``code/`` directory.
 """
+
 from __future__ import annotations
 
 import json
 import os
 import re
-import shlex
 import shutil
 import subprocess
 import sys
@@ -49,7 +47,11 @@ def _path_in_text(text: str, target_path: Path) -> bool:
     normalized = str(target_path or "")
     if not normalized:
         return False
-    candidates = {normalized, normalized.replace("\\", "/"), normalized.replace("\\", "\\\\")}
+    candidates = {
+        normalized,
+        normalized.replace("\\", "/"),
+        normalized.replace("\\", "\\\\"),
+    }
     return any(candidate and candidate in str(text) for candidate in candidates)
 
 
@@ -234,7 +236,14 @@ class McpSetup:
         spec = self._launch_spec()
         return {
             "command": spec["command"],
-            "args": ["-m", TRACE_CODEX_HOOK_MODULE, "--workspace", str(self.workspace), "--phase", phase],
+            "args": [
+                "-m",
+                TRACE_CODEX_HOOK_MODULE,
+                "--workspace",
+                str(self.workspace),
+                "--phase",
+                phase,
+            ],
             "cwd": spec["cwd"],
             "env": spec["env"],
         }
@@ -314,7 +323,11 @@ class McpSetup:
         hooks = entry.get("hooks")
         if not isinstance(hooks, list):
             return False
-        return any(TRACE_CODEX_HOOK_MODULE in str(h.get("command", "")) for h in hooks if isinstance(h, dict))
+        return any(
+            TRACE_CODEX_HOOK_MODULE in str(h.get("command", ""))
+            for h in hooks
+            if isinstance(h, dict)
+        )
 
     def _strip_trace_hook_entries(self, entries: Any) -> list[Any]:
         if not isinstance(entries, list):
@@ -323,7 +336,9 @@ class McpSetup:
 
     def _hook_command(self, phase: str) -> str:
         spec = self._hook_launch_spec(phase)
-        env_prefix = " ".join(f"{k}={_shell_quote(v)}" for k, v in (spec.get("env") or {}).items())
+        env_prefix = " ".join(
+            f"{k}={_shell_quote(v)}" for k, v in (spec.get("env") or {}).items()
+        )
         prefix = f"{env_prefix} " if env_prefix else ""
         return f"{prefix}{_command_line([spec['command'], *spec['args']])}"
 
@@ -368,19 +383,36 @@ class McpSetup:
         hooks_path = self._codex_hooks_path()
         config = self._load_codex_hooks_config()
         hooks = config.get("hooks") if isinstance(config.get("hooks"), dict) else {}
-        pre = hooks.get("PreToolUse") if isinstance(hooks.get("PreToolUse"), list) else []
-        post = hooks.get("PostToolUse") if isinstance(hooks.get("PostToolUse"), list) else []
-        hooks["PreToolUse"] = [*self._strip_trace_hook_entries(pre), self._trace_hook_entry("pre")]
-        hooks["PostToolUse"] = [*self._strip_trace_hook_entries(post), self._trace_hook_entry("post")]
+        pre = (
+            hooks.get("PreToolUse") if isinstance(hooks.get("PreToolUse"), list) else []
+        )
+        post = (
+            hooks.get("PostToolUse")
+            if isinstance(hooks.get("PostToolUse"), list)
+            else []
+        )
+        hooks["PreToolUse"] = [
+            *self._strip_trace_hook_entries(pre),
+            self._trace_hook_entry("pre"),
+        ]
+        hooks["PostToolUse"] = [
+            *self._strip_trace_hook_entries(post),
+            self._trace_hook_entry("post"),
+        ]
         config["hooks"] = hooks
         hooks_path.parent.mkdir(parents=True, exist_ok=True)
-        hooks_path.write_text(json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        hooks_path.write_text(
+            json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
         return self._inspect_codex_hook()
 
     # --- claude ------------------------------------------------------------
 
     def _inspect_claude_mcp(self) -> dict[str, Any]:
-        config_paths = [self._claude_user_config_path(), self._claude_workspace_config_path()]
+        config_paths = [
+            self._claude_user_config_path(),
+            self._claude_workspace_config_path(),
+        ]
         texts: list[str] = []
         for config_path in config_paths:
             try:
@@ -388,9 +420,15 @@ class McpSetup:
             except OSError:
                 texts.append("")
         serialized = "\n".join(texts)
-        installed = TRACE_MCP_MODULE in serialized and _path_in_text(serialized, self.workspace)
+        installed = TRACE_MCP_MODULE in serialized and _path_in_text(
+            serialized, self.workspace
+        )
         user_text = texts[0]
-        config_path = config_paths[0] if (installed and TRACE_MCP_MODULE in user_text) else config_paths[1]
+        config_path = (
+            config_paths[0]
+            if (installed and TRACE_MCP_MODULE in user_text)
+            else config_paths[1]
+        )
         return {
             "config_path": str(config_path),
             "has_trace_section": f'"{TRACE_MCP_SERVER_NAME}"' in serialized,
@@ -405,14 +443,19 @@ class McpSetup:
         config_path = self._opencode_config_path()
         config = _load_json_object(config_path)
         mcp = config.get("mcp") if isinstance(config.get("mcp"), dict) else {}
-        trace = mcp.get(TRACE_MCP_SERVER_NAME) if isinstance(mcp.get(TRACE_MCP_SERVER_NAME), dict) else {}
+        trace = (
+            mcp.get(TRACE_MCP_SERVER_NAME)
+            if isinstance(mcp.get(TRACE_MCP_SERVER_NAME), dict)
+            else {}
+        )
         serialized = json.dumps(trace or {})
         return {
             "config_path": str(config_path),
             "has_trace_section": bool(trace),
             "has_trace_server": TRACE_MCP_MODULE in serialized,
             "has_workspace": _path_in_text(serialized, self.workspace),
-            "installed": TRACE_MCP_MODULE in serialized and _path_in_text(serialized, self.workspace),
+            "installed": TRACE_MCP_MODULE in serialized
+            and _path_in_text(serialized, self.workspace),
         }
 
     def _install_opencode_config(self) -> dict[str, Any]:
@@ -422,7 +465,9 @@ class McpSetup:
         mcp[TRACE_MCP_SERVER_NAME] = self._trace_mcp_config_object()
         config["mcp"] = mcp
         config_path.parent.mkdir(parents=True, exist_ok=True)
-        config_path.write_text(json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        config_path.write_text(
+            json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
         return self._inspect_opencode_mcp()
 
     # --- command builders --------------------------------------------------
@@ -462,18 +507,21 @@ class McpSetup:
         }
 
     def _opencode_add_command(self) -> dict[str, Any]:
-        spec = self._launch_spec()
         opencode = self._find_binary("OPENCODE_CLI_PATH", "opencode")
         args = ["mcp", "add"]
         return {
             "binary": opencode,
             "args": args,
-            "command": _command_line([opencode, *args]) + "\n" + self._opencode_trace_config_text(),
+            "command": _command_line([opencode, *args])
+            + "\n"
+            + self._opencode_trace_config_text(),
             "prefix": OPENCODE_MCP_ADD_PREFIX,
         }
 
     def _opencode_trace_config_text(self) -> str:
-        return json.dumps({"mcp": {TRACE_MCP_SERVER_NAME: self._trace_mcp_config_object()}}, indent=2)
+        return json.dumps(
+            {"mcp": {TRACE_MCP_SERVER_NAME: self._trace_mcp_config_object()}}, indent=2
+        )
 
     # --- subprocess for claude --------------------------------------------
 
@@ -498,7 +546,9 @@ class McpSetup:
         if completed.returncode != 0:
             return {
                 "ok": False,
-                "error": stderr or stdout or f"mcp install exited {completed.returncode}",
+                "error": stderr
+                or stdout
+                or f"mcp install exited {completed.returncode}",
                 "stdout": stdout,
                 "stderr": stderr,
             }
@@ -509,7 +559,11 @@ class McpSetup:
     def list_rows(self) -> list[dict[str, Any]]:
         spec = self._launch_spec()
         stdio_command = _command_line([spec["command"], *spec["args"]])
-        env_line = f"PYTHONPATH={spec['env']['PYTHONPATH']}\n" if spec["env"].get("PYTHONPATH") else ""
+        env_line = (
+            f"PYTHONPATH={spec['env']['PYTHONPATH']}\n"
+            if spec["env"].get("PYTHONPATH")
+            else ""
+        )
 
         codex_state = self._inspect_codex_mcp()
         codex_hook_state = self._inspect_codex_hook()
@@ -520,22 +574,29 @@ class McpSetup:
         opencode_command = self._opencode_add_command()
 
         codex_installed = codex_state["installed"] and codex_hook_state["installed"]
-        codex_partial = (
-            not codex_installed
-            and (
-                codex_state["has_trace_section"]
-                or codex_hook_state["has_trace_hook"]
-                or codex_state["installed"]
-                or codex_hook_state["installed"]
-            )
+        codex_partial = not codex_installed and (
+            codex_state["has_trace_section"]
+            or codex_hook_state["has_trace_hook"]
+            or codex_state["installed"]
+            or codex_hook_state["installed"]
         )
-        codex_status = "installed" if codex_installed else ("partial" if codex_partial else "not-installed")
-        codex_label = "已添加" if codex_installed else ("待修复" if codex_partial else "可一键添加")
+        codex_status = (
+            "installed"
+            if codex_installed
+            else ("partial" if codex_partial else "not-installed")
+        )
+        codex_label = (
+            "已添加"
+            if codex_installed
+            else ("待修复" if codex_partial else "可一键添加")
+        )
 
         claude_status = "installed" if claude_state["installed"] else "not-installed"
         claude_label = "已添加" if claude_state["installed"] else "可一键添加"
 
-        opencode_status = "installed" if opencode_state["installed"] else "not-installed"
+        opencode_status = (
+            "installed" if opencode_state["installed"] else "not-installed"
+        )
         opencode_label = "已添加" if opencode_state["installed"] else "可一键添加"
 
         return [
@@ -696,7 +757,9 @@ class McpSetup:
             "config_path": mcp_result["config_path"],
             "hook_path": hook_result["hooks_path"],
             "hook_installed": hook_result["installed"],
-            "replaced_existing_mcp": state["has_trace_section"] and not state["installed"],
-            "replaced_existing_hook": hook_state["has_trace_hook"] and not hook_state["installed"],
+            "replaced_existing_mcp": state["has_trace_section"]
+            and not state["installed"],
+            "replaced_existing_hook": hook_state["has_trace_hook"]
+            and not hook_state["installed"],
             "restart_required": ok,
         }
