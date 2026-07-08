@@ -17,10 +17,12 @@ CommitBatcher — 防抖合并器
 import logging
 import threading
 from pathlib import Path
+from typing import Literal
 
-from daemon.ipc import emit
 from models.agent import AgentAttribution
 from models.change import Change
+
+from daemon.ipc import emit
 
 logger = logging.getLogger("trace.batcher")
 
@@ -47,7 +49,7 @@ class CommitBatcher:
         event_time: float,
         attribution: AgentAttribution,
         *,
-        kind: str = "upsert",
+        kind: Literal["upsert", "delete"] = "upsert",
     ) -> None:
         """
         收到一次文件变化事件，按 agent 入队 + 重置该 agent 的 timer。

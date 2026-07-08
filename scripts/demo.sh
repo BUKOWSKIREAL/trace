@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# scripts/demo.sh — 一键演示Trace（Trace）
+# scripts/demo.sh — 一键演示 Trace
 #
 # 流程：
 #   1. 重建 test_workspace 的 .trace 目录
-#   2. 启 daemon (headless 模式，避免抢菜单栏焦点)
-#   3. 模拟一段 "claude 改文件" 序列
+#   2. 启 daemon（headless 模式，避免占用 TUI）
+#   3. 模拟一段文件变化序列
 #   4. 退出 daemon，确认 .trace/trace.db 有 commit
-#   5. 提示用户启动菜单栏或 Electron 操作台看效果
+#   5. 提示用户启动 Textual TUI 查看时间线和 diff
 #
 # 用法：bash scripts/demo.sh
 
@@ -22,14 +22,14 @@ if ! command -v uv >/dev/null 2>&1; then
     exit 1
 fi
 
-# 清掉旧数据库（演示要"从空到有"的可视过程）
+# 清掉旧数据库（演示要“从空到有”的可视过程）
 rm -rf "$WORKSPACE/.trace"
 
 echo "=== Trace Demo ==="
 echo "workspace: $(pwd)/$WORKSPACE"
 echo
 
-echo "[1/4] 启动 daemon（headless 模式，独占终端）..."
+echo "[1/4] 启动 daemon（headless 模式）..."
 uv run python code/main.py --workspace "$WORKSPACE" --headless > /tmp/trace_demo.log 2>&1 &
 DPID=$!
 cleanup() {
@@ -105,14 +105,11 @@ for row in rows:
 PY
 
 echo
-echo "=== 数据已就绪。下面任选一种 UI 看效果 ==="
+echo "=== 数据已就绪。启动 TUI 查看时间线和 diff ==="
 echo
-echo "  A. Electron 操作台（推荐）："
-echo "     cd electron_app && npm start -- --workspace=$(pwd)/$WORKSPACE"
+echo "  uv run python code/main.py --workspace $WORKSPACE"
 echo
-echo "  B. 仅运行后台守护进程："
-echo "     uv run python code/main.py --workspace $WORKSPACE --headless"
+echo "或仅运行后台守护进程："
 echo
-echo "  C. 完整菜单栏 + daemon（要真实 claude 跑也走这条）："
-echo "     uv run python code/main.py --workspace $WORKSPACE"
+echo "  uv run python code/main.py --workspace $WORKSPACE --headless"
 echo

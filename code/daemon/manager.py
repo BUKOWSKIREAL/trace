@@ -4,8 +4,8 @@ DaemonManager — 守护进程生命周期管理
 封装 repo / batcher / observer / handler 四件套的 start / stop / restart。
 
 设计动机：watchdog Observer 一旦 stop 就不能重启，必须创建新实例。
-工作区热切（菜单栏点"更换工作区"）就是 stop 旧的 + start 新的。
-没这个抽象的话，热切的逻辑会散落在 main.py + menubar/app.py 各处，
+工作区切换需要 stop 旧的 + start 新的。
+没这个抽象的话，生命周期逻辑会散落在入口和 TUI 各处，
 而且容易漏掉关闭顺序（observer→handler→batcher）。
 
 用法（main.py）：
@@ -14,7 +14,7 @@ DaemonManager — 守护进程生命周期管理
     # ... 跑菜单栏 ...
     daemon.stop()  # 退出时
 
-用法（菜单栏热切，TraceApp.on_change_workspace）：
+用法（TUI 工作区切换）：
     self.daemon.restart(new_workspace)
 
 """
@@ -109,6 +109,8 @@ class DaemonManager:
         """
         if self.observer is None:
             return
+        assert self.handler is not None
+        assert self.batcher is not None
 
         logger.info("DaemonManager.stop: 停止文件监听...")
         self.observer.stop()

@@ -1,11 +1,11 @@
 """
 IPC — 守护线程 ↔ 主线程 UI 的事件管道
 ======================================
-基于 queue.Queue 的线程安全消息桥，用于把后台事件投递给系统托盘和操作台。
+基于 queue.Queue 的线程安全消息桥，用于把后台事件投递给 Textual TUI。
 
-设计哲学（参见项目计划核心五）：
-    后台线程绝不能直接调 Tk / rumps API → 用 queue 投递事件给主线程
-    主线程用 rumps.Timer / root.after 周期性 drain 队列
+设计哲学：
+    后台线程绝不能直接操作 UI → 用 queue 投递事件给主线程
+    Textual App 周期性 drain 队列
 
 
 """
@@ -44,7 +44,7 @@ def emit(event_type: str, **payload) -> None:
 def drain() -> list[UIEvent]:
     """
     主线程调用：把队列里所有事件取出来。非阻塞。
-    UI 在 root.after / rumps.Timer 里周期性调这个函数。
+    Textual App 周期性调用这个函数。
     """
     events: list[UIEvent] = []
     while True:

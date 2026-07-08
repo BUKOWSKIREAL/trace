@@ -1,15 +1,11 @@
 # Trace — 项目依赖列表
-# Python 3.10+ 推荐（用到了 dataclass、type hint 语法）
+# 推荐使用 uv：uv sync
 
 # === 核心依赖 ===
 watchdog>=3.0.0          # 文件系统事件监听
 psutil>=5.9.0            # 进程检测：枚举活跃 agent
-
-# === 桌面界面 ===
-rumps>=0.4.0; sys_platform == "darwin"      # macOS 状态栏
-pystray>=0.19.0; sys_platform != "darwin"   # Windows / Linux 系统托盘
-ttkbootstrap>=1.10.0     # Tkinter 现代主题；Tkinter 本体是 Python 标准库
-pyfiglet>=1.0.0          # ASCII banner（操作台标题）
+textual>=0.60            # 终端 TUI
+pyfiglet>=1.0.0          # ASCII banner（TUI 标题/展示）
 
 # === 多格式文件 handler ===
 python-docx>=1.0.0       # .docx 解析
@@ -18,18 +14,13 @@ python-pptx>=0.6.21      # .pptx 解析
 PyMuPDF>=1.23.0          # .pdf 解析；包名导入为 fitz
 Pillow>=10.0.0           # 图片处理
 
-# === 打包发布 ===
-py2app>=0.28.8; sys_platform == "darwin"    # macOS .app 打包
-pyinstaller>=6.0.0       # Windows .exe 打包依赖声明；需 Windows 真机验证
-
 # === 标准库依赖（无需 pip install，列在这只是提示）===
-# tkinter      —— Tkinter GUI
 # sqlite3      —— SQLite 数据库
 # hashlib      —— SHA-256 哈希
 # pathlib      —— 路径处理
 # threading    —— 多线程
 # queue        —— 线程间通信
-# subprocess   —— 调外部命令（osascript / mdls / fs_usage）
+# subprocess   —— 调外部命令（fs_usage / agent CLI）
 # collections  —— deque / defaultdict
 # difflib      —— 文本 diff
 # argparse     —— 命令行参数

@@ -29,7 +29,7 @@ ROOT = Path(__file__).parent.parent
 CODE_DIR = ROOT / "code"
 
 
-IDLE_WAIT = 3.5  # > batcher.IDLE_WINDOW_SECONDS(2.0) + 安全余量
+IDLE_WAIT = 6.0  # > attribution/transcript scan + batcher.IDLE_WINDOW_SECONDS(2.0)
 STARTUP_WAIT = 5.0  # 等"守护进程运行中" 出现的最长时间
 
 
@@ -60,8 +60,8 @@ class TestE2ESmoke(unittest.TestCase):
         生命周期覆盖：启动 → 新建 → 修改 → 删除 → 优雅退出 → 数据齐全。
         """
         with (
-            tempfile.TemporaryDirectory() as fake_home,
-            tempfile.TemporaryDirectory() as ws_dir,
+            tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as fake_home,
+            tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as ws_dir,
         ):
             ws = Path(ws_dir)
             log_path = ws / "daemon.log"
@@ -72,6 +72,10 @@ class TestE2ESmoke(unittest.TestCase):
             env["PYTHONUNBUFFERED"] = "1"
             env["TRACE_DISABLE_GLOBAL_AGENT_FALLBACK"] = "1"
 
+            popen_kwargs = {}
+            if sys.platform == "win32":
+                popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
             with log_path.open("w") as logf:
                 proc = subprocess.Popen(
                     [
@@ -79,14 +83,14 @@ class TestE2ESmoke(unittest.TestCase):
                         "main.py",
                         "--workspace",
                         str(ws),
-                        "--headless",  # Task 4.3 起 main.py 默认会拉 rumps；
-                        # E2E 用 --headless 跑纯守护进程
+                        "--headless",  # E2E 只跑纯守护进程，不挂 TUI
                         "-v",
                     ],
                     cwd=str(CODE_DIR),
                     stdout=logf,
                     stderr=subprocess.STDOUT,
                     env=env,
+                    **popen_kwargs,
                 )
 
             try:
@@ -106,7 +110,12 @@ class TestE2ESmoke(unittest.TestCase):
                 time.sleep(IDLE_WAIT)
 
                 # === 优雅退出 ===
-                proc.send_signal(signal.SIGINT)
+                # Windows 的 subprocess.send_signal 不接受 SIGINT；用 CTRL_BREAK_EVENT
+                # 触发子进程的 signal handler（POSIX 上直接送 SIGINT）
+                if sys.platform == "win32":
+                    proc.send_signal(signal.CTRL_BREAK_EVENT)
+                else:
+                    proc.send_signal(signal.SIGINT)
                 proc.wait(timeout=10)
 
             finally:
