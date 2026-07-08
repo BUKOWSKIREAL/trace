@@ -24,7 +24,7 @@ class _Harness(App):
 
 class MCPViewBehavior(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.ws = Path(self._tmp.name).resolve()
         self.ws.mkdir(exist_ok=True)
         self.repo = Repository(self.ws)
@@ -56,7 +56,7 @@ class MCPViewBehavior(unittest.IsolatedAsyncioTestCase):
             self.assertNotIsInstance(app.screen, InstallResultModal)
 
     async def test_install_codex_writes_config_and_shows_modal(self):
-        with tempfile.TemporaryDirectory() as home_dir:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as home_dir:
             with patch.object(Path, "home", return_value=Path(home_dir)):
                 app = _Harness(self.controller)
                 async with app.run_test() as pilot:

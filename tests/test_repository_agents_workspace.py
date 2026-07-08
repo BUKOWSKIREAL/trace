@@ -22,7 +22,7 @@ def make_change(path: Path, kind: str = "upsert", agent: str = "human") -> Chang
 
 class RepositoryAgentsWorkspace(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.ws = Path(self._tmp.name).resolve()
         self.repo = Repository(self.ws)
         self.repo.init_if_needed()

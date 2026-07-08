@@ -74,10 +74,10 @@ class CodexInstallTests(unittest.TestCase):
     def test_codex_install_replaces_stale_config_and_writes_hooks(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
-            old_workspace = Path(td) / "old-ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
+            old_workspace = Path(td).resolve() /"old-ws"
             workspace.mkdir(parents=True)
             old_workspace.mkdir()
             _seed_codex(home, workspace, old_workspace)
@@ -110,9 +110,9 @@ class CodexInstallTests(unittest.TestCase):
     def test_codex_install_is_idempotent_when_already_installed(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
             setup = McpSetup(workspace=workspace, home=home)
 
@@ -125,9 +125,9 @@ class CodexInstallTests(unittest.TestCase):
     def test_codex_row_reports_partial_when_only_mcp_present(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
             (home / ".codex").mkdir(parents=True)
             # Only TOML exists, no hooks.json -> partial.
@@ -143,9 +143,9 @@ class OpenCodeInstallTests(unittest.TestCase):
     def test_opencode_install_writes_jsonc_config(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
             result = McpSetup(workspace=workspace, home=home).install("opencode")
             self.assertTrue(result["ok"])
@@ -166,9 +166,9 @@ class OpenCodeInstallTests(unittest.TestCase):
     def test_opencode_install_preserves_existing_keys(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
             cfg = home / ".config" / "opencode" / "opencode.jsonc"
             cfg.parent.mkdir(parents=True)
@@ -186,9 +186,9 @@ class ClaudeInstallTests(unittest.TestCase):
     def test_claude_install_already_installed_skips_subprocess(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
             # Pre-seed ~/.claude.json so inspection returns installed=True.
             (home).mkdir(parents=True, exist_ok=True)
@@ -227,9 +227,9 @@ class ClaudeInstallTests(unittest.TestCase):
     def test_claude_install_invokes_claude_binary(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
 
             captured = {}
@@ -258,9 +258,9 @@ class OtherAgentTests(unittest.TestCase):
     def test_other_server_id_returns_error(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            home = Path(td) / "home"
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            home = Path(td).resolve() /"home"
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
             result = McpSetup(workspace=workspace, home=home).install("other")
             self.assertFalse(result["ok"])
@@ -269,10 +269,10 @@ class OtherAgentTests(unittest.TestCase):
     def test_unknown_server_id_returns_error(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
-            result = McpSetup(workspace=workspace, home=Path(td) / "home").install("not-a-real-agent")
+            result = McpSetup(workspace=workspace, home=Path(td).resolve() /"home").install("not-a-real-agent")
             self.assertFalse(result["ok"])
 
 
@@ -280,10 +280,10 @@ class ListRowsTests(unittest.TestCase):
     def test_list_rows_returns_four_agents_in_order(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
-            rows = McpSetup(workspace=workspace, home=Path(td) / "home").list_rows()
+            rows = McpSetup(workspace=workspace, home=Path(td).resolve() /"home").list_rows()
             ids = [r["id"] for r in rows]
             self.assertEqual(ids, ["codex", "claude", "opencode", "other"])
             for row in rows:
@@ -300,10 +300,10 @@ class ListRowsTests(unittest.TestCase):
     def test_list_rows_other_row_includes_workspace_command(self):
         import tempfile
 
-        with tempfile.TemporaryDirectory() as td:
-            workspace = Path(td) / "ws"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            workspace = Path(td).resolve() /"ws"
             workspace.mkdir(parents=True)
-            rows = McpSetup(workspace=workspace, home=Path(td) / "home").list_rows()
+            rows = McpSetup(workspace=workspace, home=Path(td).resolve() /"home").list_rows()
             other = rows[-1]
             self.assertIn(TRACE_MCP_MODULE, other["command"])
             self.assertIn(str(workspace), other["command"])

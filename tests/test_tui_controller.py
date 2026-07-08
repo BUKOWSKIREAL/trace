@@ -48,7 +48,7 @@ class _BoomRepo:
 
 class TraceControllerHappyPath(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.ws = Path(self._tmp.name)
         self.repo = Repository(self.ws)
         self.repo.init_if_needed()
@@ -85,7 +85,7 @@ class TraceControllerErrorContract(unittest.TestCase):
 
 class TraceControllerCommitDiff(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.ws = Path(self._tmp.name)
         self.repo = Repository(self.ws)
         self.repo.init_if_needed()
@@ -162,7 +162,7 @@ class TraceControllerCommitDiff(unittest.TestCase):
 
 class TraceControllerAgentsWorkspace(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.ws = Path(self._tmp.name).resolve()
         self.repo = Repository(self.ws)
         self.repo.init_if_needed()
@@ -190,7 +190,7 @@ class TraceControllerAgentsWorkspace(unittest.TestCase):
 
 class TraceControllerMcp(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.ws = Path(self._tmp.name).resolve()
         self.ws.mkdir(exist_ok=True)
         self.repo = Repository(self.ws)
@@ -215,7 +215,7 @@ class TraceControllerMcp(unittest.TestCase):
         import tempfile
         from unittest.mock import patch
 
-        with tempfile.TemporaryDirectory() as home_dir:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as home_dir:
             with patch.object(Path, "home", return_value=Path(home_dir)):
                 result = self.controller.install_mcp_server("codex")
             codex_dir = Path(home_dir) / ".codex"

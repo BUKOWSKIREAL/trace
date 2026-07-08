@@ -60,8 +60,8 @@ class TestE2ESmoke(unittest.TestCase):
         生命周期覆盖：启动 → 新建 → 修改 → 删除 → 优雅退出 → 数据齐全。
         """
         with (
-            tempfile.TemporaryDirectory() as fake_home,
-            tempfile.TemporaryDirectory() as ws_dir,
+            tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as fake_home,
+            tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as ws_dir,
         ):
             ws = Path(ws_dir)
             log_path = ws / "daemon.log"

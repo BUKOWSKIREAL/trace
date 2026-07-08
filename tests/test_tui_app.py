@@ -51,7 +51,7 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
     async def test_commits_tab_hosts_commits_view_and_refreshes_on_new_commit(self):
         from daemon import ipc as _ipc
 
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             ws = Path(tmp)
             repo = Repository(ws)
             repo.init_if_needed()
@@ -88,7 +88,7 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
         from tui.views.agents import AgentsView
         from tui.views.workspace import WorkspaceView
 
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             ws = _Path(tmp)
             repo = Repository(ws)
             repo.init_if_needed()
@@ -112,7 +112,7 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
         from core.repository import Repository
         from tui.views.mcp import MCPView
 
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             ws = _Path(tmp)
             repo = Repository(ws)
             repo.init_if_needed()
@@ -144,7 +144,7 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
         from core.repository import Repository
         from tui.views.workspace import WorkspacePickerScreen
 
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             ws = _Path(tmp)
             repo = Repository(ws)
             repo.init_if_needed()
