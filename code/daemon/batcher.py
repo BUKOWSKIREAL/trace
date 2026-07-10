@@ -139,6 +139,8 @@ class CommitBatcher:
                 )
         except Exception as e:
             logger.error("Flush [%s] 失败: %s", agent, e)
+            # 让 TUI 状态行看得到守护线程的失败，而不是只进日志
+            emit("error", message=f"Flush [{agent}] 失败: {e}")
 
     def force_flush_agent(self, agent: str) -> None:
         """立即 flush 某个 agent 的 pending（切换强制归属前调用）。"""

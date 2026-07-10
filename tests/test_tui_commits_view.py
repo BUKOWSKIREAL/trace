@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "code"))
 
 from textual.app import App, ComposeResult
-from textual.widgets import RichLog
+from textual.widgets import Label, RichLog
 
 from core.repository import Repository
 from models.agent import AgentAttribution
@@ -139,10 +139,40 @@ class CommitsViewBehavior(unittest.IsolatedAsyncioTestCase):
 
             await modal.choose("codex")
             await pilot.pause()
+            await app.workers.wait_for_complete()
+            await pilot.pause()
 
             updated = self.controller.list_commits()["commits"]
             reassigned = next(c for c in updated if c["id"] == c1)
             self.assertEqual(reassigned["author_agent"], "codex")
+
+            # 归因修正没有 IPC 事件，时间线必须由回调主动刷新
+            timeline = str(view.commit_list.children[0].query_one(Label).render())
+            self.assertIn("codex", timeline)
+
+    async def test_reassign_modal_tolerates_legacy_candidate_names(self):
+        """旧库的 candidates 里可能有 'kimi code' 这类带空格的名字，
+        不能因为 Textual identifier 规则直接崩掉。"""
+        a = self.ws / "a.txt"
+        a.write_text("one\n", encoding="utf-8")
+        c1 = self.repo.commit("human", [make_change(a)])
+        self.repo.reassign_commit(c1, "unknown")
+
+        app = _Harness(self.controller)
+        async with app.run_test() as pilot:
+            view = app.query_one(CommitsView)
+            await view.refresh_commits()
+            await pilot.pause()
+            await view.select_commit(c1)
+            await pilot.pause()
+            view._commits_by_id[c1]["candidates"] = ["kimi code", "claude"]
+
+            await view.action_reassign_selected_commit()
+            await pilot.pause()
+            from tui.views.commits import ReassignModal
+            modal = app.screen
+            self.assertIsInstance(modal, ReassignModal)
+            self.assertEqual(modal._candidates[0], "kimi code")
 
 
 if __name__ == "__main__":
