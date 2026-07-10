@@ -143,11 +143,13 @@ def _run_with_tui(
     *,
     pick_workspace: bool = False,
     controller_workspace: Path | None = None,
+    picker_initial: Path | None = None,
 ) -> int:
     """Default mode: TraceApp (Textual TUI) owns the main thread.
 
     ``pick_workspace=True`` 时进入"先选工作区再启动"流程：TUI 挂一个 DirectoryTree
-    选择屏，用户确认后才 ``daemon.start(path)`` 并切到主界面。
+    选择屏（root=``picker_initial``，通常是上次记忆的工作区），用户确认后才
+    ``daemon.start(path)`` 并切到主界面。
     """
     from tui.app import TraceApp
 
@@ -163,6 +165,7 @@ def _run_with_tui(
         daemon=daemon,
         controller=controller,
         pick_workspace=pick_workspace,
+        picker_initial=picker_initial,
     )
     try:
         app.run()
@@ -204,6 +207,7 @@ def main() -> int:
         log,
         pick_workspace=needs_picker,
         controller_workspace=workspace,
+        picker_initial=load_last_workspace() if needs_picker else None,
     )
 
 

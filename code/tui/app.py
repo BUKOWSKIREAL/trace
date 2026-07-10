@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header, Static, TabbedContent, TabPane
 
@@ -24,11 +25,13 @@ class TraceApp(App):
         controller: TraceController | None = None,
         *,
         pick_workspace: bool = False,
+        picker_initial: Path | None = None,
     ) -> None:
         super().__init__()
         self._daemon = daemon
         self._controller = controller
         self._pick_workspace = pick_workspace
+        self._picker_initial = picker_initial
         if not pick_workspace and controller is None:
             self._controller = TraceController(
                 getattr(daemon, "repo", None), daemon.workspace
@@ -50,7 +53,10 @@ class TraceApp(App):
 
     def on_mount(self) -> None:
         if self._pick_workspace:
-            self.push_screen(WorkspacePickerScreen(initial=None), self._on_workspace_picked)
+            self.push_screen(
+                WorkspacePickerScreen(initial=self._picker_initial),
+                self._on_workspace_picked,
+            )
         self.set_interval(0.5, self._drain_ipc)
 
     def _on_workspace_picked(self, path: Path | None) -> None:
@@ -70,15 +76,17 @@ class TraceApp(App):
             getattr(self._daemon, "repo", None), path
         )
         # Re-bind the views that were composed with a placeholder controller.
-        for view_cls in (CommitsView, AgentsView, WorkspaceView, MCPView):
-            try:
-                view = self.query_one(view_cls)
-                view._controller = self._controller
-                refresh = getattr(view, "refresh_commits", None) or getattr(view, "refresh_agents", None) or getattr(view, "refresh_summary", None) or getattr(view, "refresh_setup", None)
-                if refresh is not None:
-                    self.run_worker(refresh())
-            except Exception:
-                pass
+        for view_cls, refresh_name in (
+            (CommitsView, "refresh_commits"),
+            (AgentsView, "refresh_agents"),
+            (WorkspaceView, "refresh_summary"),
+            (MCPView, "refresh_setup"),
+        ):
+            view = self.query_one(view_cls)
+            view._controller = self._controller
+            self.run_worker(
+                getattr(view, refresh_name)(), group=refresh_name, exclusive=True
+            )
         if isinstance(self.screen, WorkspacePickerScreen):
             self.pop_screen()
 
@@ -88,12 +96,27 @@ class TraceApp(App):
                 cid = event.payload.get("commit_id")
                 agent = event.payload.get("agent", "?")
                 self.query_one("#status-line", Static).update(
-                    f"new commit #{cid} by {agent}"
+                    Text(f"new commit #{cid} by {agent}")
                 )
-                self.run_worker(self.query_one(CommitsView).refresh_commits())
-                self.run_worker(self.query_one(AgentsView).refresh_agents())
-                self.run_worker(self.query_one(WorkspaceView).refresh_summary())
+                # exclusive workers：同一批多个 new_commit 只保留最后一轮刷新，
+                # 避免 clear/append 交错把列表行翻倍
+                self.run_worker(
+                    self.query_one(CommitsView).refresh_commits(),
+                    group="refresh_commits",
+                    exclusive=True,
+                )
+                self.run_worker(
+                    self.query_one(AgentsView).refresh_agents(),
+                    group="refresh_agents",
+                    exclusive=True,
+                )
+                self.run_worker(
+                    self.query_one(WorkspaceView).refresh_summary(),
+                    group="refresh_summary",
+                    exclusive=True,
+                )
             elif event.type == "error":
+                # Text() 保证消息里的 [] 被当字面量渲染，不做 markup 解析
                 self.query_one("#status-line", Static).update(
-                    f"[red]{event.payload.get('message', 'error')}[/red]"
+                    Text(str(event.payload.get("message", "error")), style="red")
                 )

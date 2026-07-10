@@ -1,6 +1,8 @@
 """AgentsView — per-agent stats and a list of registered agents."""
 from __future__ import annotations
 
+import asyncio
+
 from rich.text import Text
 
 from textual.app import ComposeResult
@@ -36,7 +38,8 @@ class RevertConfirmModal(ModalScreen[bool]):
             self.dismiss(False)
 
     async def confirm(self) -> None:
-        result = self._controller.revert_agent(self._agent)
+        # revert 会重写多份工作区文件，放线程池免得冻住 UI
+        result = await asyncio.to_thread(self._controller.revert_agent, self._agent)
         self.dismiss(bool(result.get("ok")))
 
 
@@ -83,27 +86,31 @@ class AgentsView(Widget):
 
         list_view = self.agent_list
         await list_view.clear()
-        for agent in self._agents:
+        # id 用序号而不是 agent 名：历史库里可能有不满足 Textual identifier 规则的名字
+        for i, agent in enumerate(self._agents):
             name = agent.get("name", "unknown")
             display = agent.get("display_name", name)
             count = agent.get("commit_count", 0)
             last = agent.get("last_time") or "never"
             label = f"{display} ({name})  ·  {count} commits  ·  last {last}"
-            await list_view.append(ListItem(Label(Text(label)), id=f"agentrow-{name}"))
+            await list_view.append(ListItem(Label(Text(label)), id=f"agentrow-{i}"))
 
     async def action_revert_highlighted_agent(self) -> None:
         item = self.agent_list.highlighted_child
         if item is None or item.id is None:
             return
-        agent = item.id.removeprefix("agentrow-")
-        await self.action_revert_agent(agent)
+        index = int(item.id.removeprefix("agentrow-"))
+        await self.action_revert_agent(self._agents[index].get("name", "unknown"))
 
     async def action_revert_agent(self, agent: str) -> None:
         if agent in self._NON_REVERTABLE:
             self.app.notify(f"'{agent}' contributions can't be reverted", severity="warning")
             return
-        preview = self._controller.preview_revert_agent(agent)
+        preview = await asyncio.to_thread(self._controller.preview_revert_agent, agent)
         if not preview.get("ok"):
+            self.app.notify(
+                f"revert preview failed: {preview.get('error')}", severity="error"
+            )
             return
         changed_count = len(preview["preview"].get("changed_paths", []))
         modal = RevertConfirmModal(agent, changed_count, self._controller)

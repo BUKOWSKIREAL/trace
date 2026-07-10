@@ -48,6 +48,18 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
             status = app.query_one("#status-line", Static)
             self.assertIn("7", str(status.render()))
 
+    async def test_drains_error_event_with_brackets_as_literal_text(self):
+        """error 消息里的 [] 必须按字面量渲染，不能被 Rich markup 解析崩掉。"""
+        daemon = _FakeDaemon()
+        app = TraceApp(daemon=daemon)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            ipc.emit("error", message="Flush [claude] 失败: [/bad] not a tag")
+            await pilot.pause(0.6)
+            status = app.query_one("#status-line", Static)
+            self.assertIn("claude", str(status.render()))
+            self.assertIn("[/bad]", str(status.render()))
+
     async def test_commits_tab_hosts_commits_view_and_refreshes_on_new_commit(self):
         from daemon import ipc as _ipc
 
@@ -137,6 +149,21 @@ class TraceAppShell(unittest.IsolatedAsyncioTestCase):
         async with app.run_test() as pilot:
             await pilot.pause()
             self.assertIsInstance(app.screen, WorkspacePickerScreen)
+
+    async def test_pick_workspace_mode_roots_picker_at_picker_initial(self):
+        """--choose 时选择屏应该以上次记忆的工作区为 root，而不是 $HOME。"""
+        from tui.views.workspace import WorkspacePickerScreen
+
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            root = Path(tmp).resolve()
+            app = TraceApp(
+                daemon=_FakeDaemon(), pick_workspace=True, picker_initial=root
+            )
+            async with app.run_test() as pilot:
+                await pilot.pause()
+                screen = app.screen
+                self.assertIsInstance(screen, WorkspacePickerScreen)
+                self.assertEqual(screen.root_path, root)
 
     async def test_pick_mode_serve_workspace_starts_daemon_and_pops_picker(self):
         import tempfile

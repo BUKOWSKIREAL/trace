@@ -73,8 +73,11 @@ class MCPViewBehavior(unittest.IsolatedAsyncioTestCase):
 
     async def test_copy_command_uses_clipboard(self):
         captured = {"text": None}
+        notices: list[str] = []
 
-        async def _fake_clipboard(text):
+        # App.copy_to_clipboard 是同步 API——fake 必须也是同步的，
+        # 否则会掩盖生产代码里错误 await 的回归。
+        def _fake_clipboard(text):
             captured["text"] = text
 
         app = _Harness(self.controller)
@@ -86,12 +89,18 @@ class MCPViewBehavior(unittest.IsolatedAsyncioTestCase):
             # Highlight the first row (codex) so action_copy_command has a target.
             view.mcp_list.index = 0
             await pilot.pause()
-            with patch.object(app, "copy_to_clipboard", side_effect=_fake_clipboard):
+            with (
+                patch.object(app, "copy_to_clipboard", side_effect=_fake_clipboard),
+                patch.object(
+                    app, "notify", side_effect=lambda msg, **kw: notices.append(str(msg))
+                ),
+            ):
                 await view.action_copy_command()
                 await pilot.pause()
 
             self.assertIsNotNone(captured["text"])
             self.assertIn("codex", captured["text"])
+            self.assertTrue(notices and notices[0].startswith("copied"), notices)
 
 
 if __name__ == "__main__":

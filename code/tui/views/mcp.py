@@ -1,6 +1,8 @@
 """MCPView — one row per agent showing MCP install state, with install/copy actions."""
 from __future__ import annotations
 
+import asyncio
+
 from rich.text import Text
 
 from textual.app import ComposeResult
@@ -111,7 +113,10 @@ class MCPView(Widget):
                 severity="warning",
             )
             return
-        result = self._controller.install_mcp_server(server_id)
+        # install 里可能有最长 20s 的子进程调用（claude mcp add），放线程池免得冻住 UI
+        result = await asyncio.to_thread(
+            self._controller.install_mcp_server, server_id
+        )
         await self.refresh_setup()
         await self.app.push_screen(InstallResultModal(server_id, result))
 
@@ -125,7 +130,7 @@ class MCPView(Widget):
             return
         command = row.get("command", "")
         try:
-            await self.app.copy_to_clipboard(command)
+            self.app.copy_to_clipboard(command)
             self.app.notify(f"copied: {command[:60]}{'…' if len(command) > 60 else ''}")
         except Exception as exc:  # noqa: BLE001 - clipboard may be unavailable on some platforms
             self.app.notify(f"copy failed: {exc}", severity="error")

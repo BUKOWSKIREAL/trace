@@ -1,6 +1,8 @@
 """CommitsView — timeline list (left) + diff pane (right)."""
 from __future__ import annotations
 
+import asyncio
+
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -12,8 +14,12 @@ _STATUS_MARK = {"new": "[+ new]", "modified": "[~ mod]", "deleted": "[- del]"}
 _TAG_STYLE = {"added": "green", "removed": "red", "meta": "dim"}
 
 
-class RestoreConfirmModal(ModalScreen[bool]):
-    """Confirms restoring one file from one commit before touching the workspace."""
+class RestoreConfirmModal(ModalScreen[bool | None]):
+    """Confirms restoring one file from one commit before touching the workspace.
+
+    Dismisses with True/False for restore success/failure and None on cancel,
+    so the caller can tell "user backed out" apart from "restore failed".
+    """
 
     def __init__(self, commit_id: int, file_path: str, controller) -> None:
         super().__init__()
@@ -32,10 +38,13 @@ class RestoreConfirmModal(ModalScreen[bool]):
         if event.button.id == "confirm":
             self.run_worker(self.confirm())
         else:
-            self.dismiss(False)
+            self.dismiss(None)
 
     async def confirm(self) -> None:
-        result = self._controller.restore_file(self._commit_id, self._file_path)
+        # restore 会先做全量快照备份，工作区大时不能占住事件循环
+        result = await asyncio.to_thread(
+            self._controller.restore_file, self._commit_id, self._file_path
+        )
         self.dismiss(bool(result.get("ok")))
 
 
@@ -51,14 +60,19 @@ class ReassignModal(ModalScreen[str | None]):
     def compose(self) -> ComposeResult:
         with Vertical(id="reassign-modal"):
             yield Label(f"Who made commit #{self._commit_id}?")
+            # id 用序号而不是 agent 名：历史库里可能有 "kimi code" 这种
+            # 不满足 Textual identifier 规则的名字
             yield ListView(
-                *[ListItem(Label(name), id=f"agent-{name}") for name in self._candidates],
+                *[
+                    ListItem(Label(Text(name)), id=f"agent-{i}")
+                    for i, name in enumerate(self._candidates)
+                ],
                 id="agent-choices",
             )
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
-        name = event.item.id.removeprefix("agent-")
-        self.run_worker(self.choose(name))
+        index = int(event.item.id.removeprefix("agent-"))
+        self.run_worker(self.choose(self._candidates[index]))
 
     async def choose(self, agent: str) -> None:
         result = self._controller.reassign_commit(self._commit_id, agent)
@@ -121,7 +135,8 @@ class CommitsView(Widget):
     async def select_commit(self, commit_id: int) -> None:
         log = self.query_one("#diff-log", RichLog)
         log.clear()
-        result = self._controller.get_commit_diff(commit_id)
+        # diff 组装要读 blob 并跑 handler（docx/pdf 解析可能上秒级），放线程池
+        result = await asyncio.to_thread(self._controller.get_commit_diff, commit_id)
         self._selected_commit_id = commit_id
         self._selected_files = result.get("files", []) if result.get("ok") else []
         if not result.get("ok"):
@@ -143,7 +158,15 @@ class CommitsView(Widget):
         # v1: act on the first restorable file in the current diff view.
         target = restorable[0]
         modal = RestoreConfirmModal(self._selected_commit_id, target["path"], self._controller)
-        await self.app.push_screen(modal)
+        await self.app.push_screen(modal, self._after_restore)
+
+    def _after_restore(self, ok: bool | None) -> None:
+        if ok is None:  # cancelled
+            return
+        if ok:
+            self.app.notify("file restored")
+        else:
+            self.app.notify("restore failed", severity="error")
 
     async def action_reassign_selected_commit(self) -> None:
         if self._selected_commit_id is None:
@@ -153,4 +176,17 @@ class CommitsView(Widget):
             return
         candidates = commit.get("candidates") or []
         modal = ReassignModal(self._selected_commit_id, list(candidates), self._controller)
-        await self.app.push_screen(modal)
+        await self.app.push_screen(modal, self._after_reassign)
+
+    def _after_reassign(self, agent: str | None) -> None:
+        """Reassignment changes the DB without emitting an IPC event, so the
+        timeline must be refreshed here or it keeps showing the old agent."""
+        if agent is None:
+            return
+
+        async def _refresh() -> None:
+            await self.refresh_commits()
+            if self._selected_commit_id is not None:
+                await self.select_commit(self._selected_commit_id)
+
+        self.run_worker(_refresh(), group="refresh_commits", exclusive=True)
